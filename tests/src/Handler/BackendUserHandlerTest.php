@@ -39,9 +39,13 @@ final class BackendUserHandlerTest extends TestCase
     {
         $restore = (new BackendUserHandler())->apply(new WithBackendUser(admin: true, uid: 42));
 
-        self::assertInstanceOf(BackendUserAuthentication::class, $GLOBALS['BE_USER']);
-        self::assertTrue($GLOBALS['BE_USER']->isAdmin());
-        self::assertSame(42, $GLOBALS['BE_USER']->user['uid']);
+        $backendUser = $GLOBALS['BE_USER'];
+        self::assertInstanceOf(BackendUserAuthentication::class, $backendUser);
+        self::assertTrue($backendUser->isAdmin());
+
+        $user = $backendUser->user;
+        self::assertIsArray($user);
+        self::assertSame(42, $user['uid']);
 
         $restore();
 

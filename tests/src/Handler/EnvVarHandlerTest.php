@@ -77,8 +77,9 @@ final class EnvVarHandlerTest extends TestCase
     public function restorerRevertsPreviouslySetVariable(): void
     {
         putenv(self::VAR.'=before');
-        $_ENV[self::VAR] = 'before';
-        $_SERVER[self::VAR] = 'before';
+        $previous = (string) getenv(self::VAR);
+        $_ENV[self::VAR] = $previous;
+        $_SERVER[self::VAR] = $previous;
 
         $restore = $this->subject->apply(new WithEnvVar(self::VAR, 'after'));
         $restore();

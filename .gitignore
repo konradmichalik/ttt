@@ -6,6 +6,8 @@
 /coverage-report
 /php-cs-fixer.xml
 /phpstan.xml
+/public
 /site
+/var
 /tests/composer.lock
 /tests/vendor

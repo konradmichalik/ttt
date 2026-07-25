@@ -47,6 +47,11 @@ final class ConfVarsHandlerTest extends TestCase
         self::assertTrue($this->subject->supports(new WithTypo3ConfVars([])));
     }
 
+    /**
+     * @param array<string, mixed> $existing
+     * @param array<string, mixed> $override
+     * @param array<string, mixed> $expected
+     */
     #[Test]
     #[DataProvider('mergeCases')]
     public function appliesConfigurationByDeepMerge(array $existing, array $override, array $expected): void

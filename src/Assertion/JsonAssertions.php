@@ -39,7 +39,13 @@ trait JsonAssertions
      */
     public static function assertJsonPath(string|array $json, string $path, mixed $expected): void
     {
-        Assert::assertSame($expected, self::resolveJsonPath($json, $path), sprintf('Failed asserting JSON path "%s".', $path));
+        ['found' => $found, 'value' => $value, 'missingSegment' => $missingSegment] = self::traverseJsonPath($json, $path);
+
+        if (!$found) {
+            Assert::fail(sprintf('JSON path "%s" does not exist (missing segment "%s").', $path, $missingSegment));
+        }
+
+        Assert::assertSame($expected, $value, sprintf('Failed asserting JSON path "%s".', $path));
     }
 
     /**
@@ -47,8 +53,9 @@ trait JsonAssertions
      */
     public static function assertJsonHasPath(string|array $json, string $path): void
     {
-        self::resolveJsonPath($json, $path);
-        Assert::assertTrue(true);
+        ['found' => $found, 'missingSegment' => $missingSegment] = self::traverseJsonPath($json, $path);
+
+        Assert::assertTrue($found, sprintf('JSON path "%s" does not exist (missing segment "%s").', $path, $missingSegment));
     }
 
     /**
@@ -64,8 +71,10 @@ trait JsonAssertions
 
     /**
      * @param string|array<array-key, mixed> $json
+     *
+     * @return array{found: bool, value: mixed, missingSegment: string|null}
      */
-    private static function resolveJsonPath(string|array $json, string $path): mixed
+    private static function traverseJsonPath(string|array $json, string $path): array
     {
         $data = is_string($json)
             ? json_decode($json, true, 512, \JSON_THROW_ON_ERROR)
@@ -73,12 +82,12 @@ trait JsonAssertions
 
         foreach (explode('.', $path) as $segment) {
             if (!is_array($data) || !array_key_exists($segment, $data)) {
-                Assert::fail(sprintf('JSON path "%s" does not exist (missing segment "%s").', $path, $segment));
+                return ['found' => false, 'value' => null, 'missingSegment' => $segment];
             }
 
             $data = $data[$segment];
         }
 
-        return $data;
+        return ['found' => true, 'value' => $data, 'missingSegment' => null];
     }
 }

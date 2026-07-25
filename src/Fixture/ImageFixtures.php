@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Ttt\Fixture;
 
+use InvalidArgumentException;
 use RuntimeException;
 
 use function bin2hex;
@@ -21,6 +22,7 @@ use function imagecreatetruecolor;
 use function imagefill;
 use function imagepng;
 use function random_bytes;
+use function sprintf;
 use function sys_get_temp_dir;
 
 /**
@@ -43,6 +45,16 @@ final class ImageFixtures
      */
     public static function createPng(int $width = 64, int $height = 64, array $rgb = [200, 200, 200], ?string $path = null): string
     {
+        if ($width < 1 || $height < 1) {
+            throw new InvalidArgumentException(sprintf('Image dimensions must be positive, got %dx%d.', $width, $height), 1752561610);
+        }
+
+        [$red, $green, $blue] = $rgb;
+
+        if ($red < 0 || $red > 255 || $green < 0 || $green > 255 || $blue < 0 || $blue > 255) {
+            throw new InvalidArgumentException(sprintf('RGB components must be within 0-255, got [%d, %d, %d].', $red, $green, $blue), 1752561611);
+        }
+
         $path ??= sys_get_temp_dir().'/ttt-'.bin2hex(random_bytes(16)).'.png';
 
         $image = imagecreatetruecolor($width, $height);
@@ -51,7 +63,7 @@ final class ImageFixtures
             throw new RuntimeException('Unable to create GD image resource.', 1752561602);
         }
 
-        $color = imagecolorallocate($image, ...$rgb);
+        $color = imagecolorallocate($image, $red, $green, $blue);
         imagefill($image, 0, 0, (int) $color);
         imagepng($image, $path);
 

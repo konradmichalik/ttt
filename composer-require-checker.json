@@ -1,18 +1,18 @@
 {
-    "symbol-whitelist": [
-        "imagecolorallocate",
-        "imagecreatetruecolor",
-        "imagefill",
-        "imagepng",
-        "TYPO3\\CMS\\Core\\Authentication\\BackendUserAuthentication",
-        "TYPO3\\CMS\\Core\\Context\\Context",
-        "TYPO3\\CMS\\Core\\Context\\DateTimeAspect",
-        "TYPO3\\CMS\\Core\\Core\\ApplicationContext",
-        "TYPO3\\CMS\\Core\\Core\\Environment",
-        "TYPO3\\CMS\\Core\\Http\\NormalizedParams",
-        "TYPO3\\CMS\\Core\\Http\\ServerRequest",
-        "TYPO3\\CMS\\Core\\Http\\Stream",
-        "TYPO3\\CMS\\Core\\SingletonInterface",
-        "TYPO3\\CMS\\Core\\Utility\\GeneralUtility"
-    ]
+	"symbol-whitelist": [
+		"imagecolorallocate",
+		"imagecreatetruecolor",
+		"imagefill",
+		"imagepng",
+		"TYPO3\\CMS\\Core\\Authentication\\BackendUserAuthentication",
+		"TYPO3\\CMS\\Core\\Context\\Context",
+		"TYPO3\\CMS\\Core\\Context\\DateTimeAspect",
+		"TYPO3\\CMS\\Core\\Core\\ApplicationContext",
+		"TYPO3\\CMS\\Core\\Core\\Environment",
+		"TYPO3\\CMS\\Core\\Http\\NormalizedParams",
+		"TYPO3\\CMS\\Core\\Http\\ServerRequest",
+		"TYPO3\\CMS\\Core\\Http\\Stream",
+		"TYPO3\\CMS\\Core\\SingletonInterface",
+		"TYPO3\\CMS\\Core\\Utility\\GeneralUtility"
+	]
 }

@@ -37,6 +37,6 @@ final class RestorationBetweenTestsTest extends TestCase
     #[Test]
     public function envVarIsNotLeakedByAnnotatedTests(): void
     {
-        self::assertFalse(\getenv('TTT_INTEGRATION_VAR'));
+        self::assertFalse(getenv('TTT_INTEGRATION_VAR'));
     }
 }

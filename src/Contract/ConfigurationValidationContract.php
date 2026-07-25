@@ -13,8 +13,10 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Ttt\Contract;
 
+use Generator;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 use function is_int;
 use function sprintf;
@@ -58,21 +60,6 @@ use function substr;
  */
 abstract class ConfigurationValidationContract extends TestCase
 {
-    /**
-     * @param array<string, mixed> $configuration
-     */
-    abstract protected function isValid(array $configuration): bool;
-
-    /**
-     * @return array<string, mixed>
-     */
-    abstract protected function validConfiguration(): array;
-
-    /**
-     * @return array<string, string>
-     */
-    abstract protected function schema(): array;
-
     #[Test]
     public function validConfigurationIsAccepted(): void
     {
@@ -91,9 +78,24 @@ abstract class ConfigurationValidationContract extends TestCase
     }
 
     /**
-     * @return \Generator<string, array<string, mixed>>
+     * @param array<string, mixed> $configuration
      */
-    private function generateViolations(): \Generator
+    abstract protected function isValid(array $configuration): bool;
+
+    /**
+     * @return array<string, mixed>
+     */
+    abstract protected function validConfiguration(): array;
+
+    /**
+     * @return array<string, string>
+     */
+    abstract protected function schema(): array;
+
+    /**
+     * @return Generator<string, array<string, mixed>>
+     */
+    private function generateViolations(): Generator
     {
         $valid = $this->validConfiguration();
 
@@ -148,7 +150,7 @@ abstract class ConfigurationValidationContract extends TestCase
             'int', 'float' => 'not-a-number',
             'bool' => 'not-a-bool',
             'array' => 'not-an-array',
-            default => new \stdClass(),
+            default => new stdClass(),
         };
     }
 }

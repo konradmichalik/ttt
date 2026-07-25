@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Ttt;
 
-use KonradMichalik\Ttt\Handler\{ApplicationContextHandler, BackendUserHandler, ConfVarsHandler, EnvironmentHandler, EnvVarHandler, FreezeTimeHandler, SingletonHandler};
+use KonradMichalik\Ttt\Handler\{ApplicationContextHandler, BackendUserHandler, ConfVarsHandler, EnvVarHandler, EnvironmentHandler, FreezeTimeHandler, SingletonHandler};
 use KonradMichalik\Ttt\Registry\SandboxRegistry;
 use KonradMichalik\Ttt\Subscriber\{ApplySandboxSubscriber, RestoreSandboxSubscriber};
 use PHPUnit\Runner\Extension\{Extension, Facade, ParameterCollection};

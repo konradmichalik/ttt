@@ -56,6 +56,6 @@ final class WithTypo3ConfVarsAttributeTest extends TestCase
     #[WithEnvVar('TTT_INTEGRATION_VAR', '1')]
     public function envVarAttributeIsApplied(): void
     {
-        self::assertSame('1', \getenv('TTT_INTEGRATION_VAR'));
+        self::assertSame('1', getenv('TTT_INTEGRATION_VAR'));
     }
 }

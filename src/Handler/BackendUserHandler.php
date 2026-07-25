@@ -18,6 +18,7 @@ use KonradMichalik\Ttt\Attribute\{TttAttribute, WithBackendUser};
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 
 use function array_key_exists;
+use function assert;
 
 /**
  * BackendUserHandler.
@@ -38,7 +39,7 @@ final class BackendUserHandler implements AttributeHandler
 
     public function apply(TttAttribute $attribute): Closure
     {
-        \assert($attribute instanceof WithBackendUser);
+        assert($attribute instanceof WithBackendUser);
 
         $existed = array_key_exists('BE_USER', $GLOBALS);
         $previous = $GLOBALS['BE_USER'] ?? null;

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Ttt\Traits;
 
+use Closure;
 use KonradMichalik\Ttt\Attribute\WithTypo3ConfVars;
 use KonradMichalik\Ttt\Handler\ConfVarsHandler;
 
@@ -28,7 +29,7 @@ use KonradMichalik\Ttt\Handler\ConfVarsHandler;
  */
 trait ConfVarsSandbox
 {
-    /** @var list<\Closure(): void> */
+    /** @var list<Closure(): void> */
     private array $confVarsRestorers = [];
 
     /**
@@ -44,7 +45,7 @@ trait ConfVarsSandbox
     protected function restoreTypo3ConfVars(): void
     {
         while ([] !== $this->confVarsRestorers) {
-            $restorer = \array_pop($this->confVarsRestorers);
+            $restorer = array_pop($this->confVarsRestorers);
             $restorer();
         }
     }

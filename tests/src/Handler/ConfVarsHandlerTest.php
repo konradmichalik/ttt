@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Ttt\Tests\Handler;
 
+use Generator;
 use KonradMichalik\Ttt\Attribute\WithTypo3ConfVars;
 use KonradMichalik\Ttt\Handler\ConfVarsHandler;
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
@@ -58,9 +59,9 @@ final class ConfVarsHandlerTest extends TestCase
     }
 
     /**
-     * @return \Generator<string, array{array<string, mixed>, array<string, mixed>, array<string, mixed>}>
+     * @return Generator<string, array{array<string, mixed>, array<string, mixed>, array<string, mixed>}>
      */
-    public static function mergeCases(): \Generator
+    public static function mergeCases(): Generator
     {
         yield 'adds new top-level key' => [
             ['SYS' => ['sitename' => 'Base']],

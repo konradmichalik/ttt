@@ -18,6 +18,7 @@ use KonradMichalik\Ttt\Attribute\{TttAttribute, WithSingleton};
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+use function assert;
 use function is_string;
 
 /**
@@ -39,12 +40,12 @@ final class SingletonHandler implements AttributeHandler
 
     public function apply(TttAttribute $attribute): Closure
     {
-        \assert($attribute instanceof WithSingleton);
+        assert($attribute instanceof WithSingleton);
 
         $snapshot = GeneralUtility::getSingletonInstances();
 
         $instance = is_string($attribute->instance) ? new ($attribute->instance)() : $attribute->instance;
-        \assert($instance instanceof SingletonInterface);
+        assert($instance instanceof SingletonInterface);
 
         GeneralUtility::setSingletonInstance($attribute->className, $instance);
 

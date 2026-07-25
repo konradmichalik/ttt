@@ -14,9 +14,11 @@ declare(strict_types=1);
 namespace KonradMichalik\Ttt\Handler;
 
 use Closure;
+use InvalidArgumentException;
 use KonradMichalik\Ttt\Attribute\{TttAttribute, WithEnvVar};
 
 use function array_key_exists;
+use function assert;
 use function getenv;
 use function preg_match;
 use function putenv;
@@ -40,15 +42,12 @@ final class EnvVarHandler implements AttributeHandler
 
     public function apply(TttAttribute $attribute): Closure
     {
-        \assert($attribute instanceof WithEnvVar);
+        assert($attribute instanceof WithEnvVar);
 
         $name = $attribute->name;
 
         if (1 !== preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $name)) {
-            throw new \InvalidArgumentException(
-                sprintf('Invalid environment variable name "%s".', $name),
-                1752561605,
-            );
+            throw new InvalidArgumentException(sprintf('Invalid environment variable name "%s".', $name), 1752561605);
         }
         $previous = getenv($name);
         $previousEnv = array_key_exists($name, $_ENV) ? $_ENV[$name] : null;

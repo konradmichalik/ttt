@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace KonradMichalik\Ttt\Tests\Assertion;
 
 use KonradMichalik\Ttt\Assertion\JsonAssertions;
-use PHPUnit\Framework\Attributes\{CoversTrait, Test};
 use PHPUnit\Framework\{AssertionFailedError, TestCase};
+use PHPUnit\Framework\Attributes\{CoversTrait, Test};
 
 /**
  * JsonAssertionsTest.

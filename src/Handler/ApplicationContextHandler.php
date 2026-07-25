@@ -14,9 +14,12 @@ declare(strict_types=1);
 namespace KonradMichalik\Ttt\Handler;
 
 use Closure;
+use Error;
 use KonradMichalik\Ttt\Attribute\{InApplicationContext, TttAttribute};
 use RuntimeException;
 use TYPO3\CMS\Core\Core\{ApplicationContext, Environment};
+
+use function assert;
 
 /**
  * ApplicationContextHandler.
@@ -36,15 +39,12 @@ final class ApplicationContextHandler implements AttributeHandler
 
     public function apply(TttAttribute $attribute): Closure
     {
-        \assert($attribute instanceof InApplicationContext);
+        assert($attribute instanceof InApplicationContext);
 
         try {
             $previousContext = (string) Environment::getContext();
-        } catch (\Error) {
-            throw new RuntimeException(
-                'InApplicationContext requires an initialized TYPO3 Environment. Combine it with #[WithEnvironment].',
-                1752561601,
-            );
+        } catch (Error) {
+            throw new RuntimeException('InApplicationContext requires an initialized TYPO3 Environment. Combine it with #[WithEnvironment].', 1752561601);
         }
 
         self::reinitializeWithContext($attribute->context);

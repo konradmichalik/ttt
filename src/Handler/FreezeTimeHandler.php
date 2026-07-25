@@ -20,6 +20,7 @@ use TYPO3\CMS\Core\Context\{Context, DateTimeAspect};
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 use function array_key_exists;
+use function assert;
 
 /**
  * FreezeTimeHandler.
@@ -43,7 +44,7 @@ final class FreezeTimeHandler implements AttributeHandler
 
     public function apply(TttAttribute $attribute): Closure
     {
-        \assert($attribute instanceof FreezeTime);
+        assert($attribute instanceof FreezeTime);
 
         $singletonSnapshot = GeneralUtility::getSingletonInstances();
         $globalsSnapshot = [];

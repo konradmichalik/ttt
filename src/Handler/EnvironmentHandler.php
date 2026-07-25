@@ -14,10 +14,12 @@ declare(strict_types=1);
 namespace KonradMichalik\Ttt\Handler;
 
 use Closure;
+use Error;
 use KonradMichalik\Ttt\Attribute\{TttAttribute, WithEnvironment};
 use RuntimeException;
 use TYPO3\CMS\Core\Core\{ApplicationContext, Environment};
 
+use function assert;
 use function bin2hex;
 use function is_dir;
 use function is_link;
@@ -48,7 +50,7 @@ final class EnvironmentHandler implements AttributeHandler
 
     public function apply(TttAttribute $attribute): Closure
     {
-        \assert($attribute instanceof WithEnvironment);
+        assert($attribute instanceof WithEnvironment);
 
         $snapshot = self::snapshot();
 
@@ -113,7 +115,7 @@ final class EnvironmentHandler implements AttributeHandler
                 'currentScript' => Environment::getCurrentScript(),
                 'os' => Environment::isWindows() ? 'WINDOWS' : 'UNIX',
             ];
-        } catch (\Error) {
+        } catch (Error) {
             // Environment was never initialized in this process.
             return null;
         }

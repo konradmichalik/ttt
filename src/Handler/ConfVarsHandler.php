@@ -17,6 +17,7 @@ use Closure;
 use KonradMichalik\Ttt\Attribute\{TttAttribute, WithTypo3ConfVars};
 
 use function array_key_exists;
+use function assert;
 use function is_array;
 
 /**
@@ -38,7 +39,7 @@ final class ConfVarsHandler implements AttributeHandler
 
     public function apply(TttAttribute $attribute): Closure
     {
-        \assert($attribute instanceof WithTypo3ConfVars);
+        assert($attribute instanceof WithTypo3ConfVars);
 
         $existed = array_key_exists('TYPO3_CONF_VARS', $GLOBALS) && is_array($GLOBALS['TYPO3_CONF_VARS']);
         /** @var array<string, mixed> $snapshot */

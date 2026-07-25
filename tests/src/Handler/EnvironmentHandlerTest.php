@@ -47,19 +47,19 @@ final class EnvironmentHandlerTest extends TestCase
     #[Test]
     public function cleanupDoesNotFollowSymlinksOutOfTheSandbox(): void
     {
-        $outside = \sys_get_temp_dir().'/ttt-outside-'.\bin2hex(\random_bytes(8));
-        \mkdir($outside, 0o700, true);
-        \file_put_contents($outside.'/sentinel.txt', 'must survive');
+        $outside = sys_get_temp_dir().'/ttt-outside-'.bin2hex(random_bytes(8));
+        mkdir($outside, 0o700, true);
+        file_put_contents($outside.'/sentinel.txt', 'must survive');
 
         $restore = (new EnvironmentHandler())->apply(new WithEnvironment(context: 'Testing'));
-        \symlink($outside, Environment::getVarPath().'/link-to-outside');
+        symlink($outside, Environment::getVarPath().'/link-to-outside');
 
         $restore();
 
         self::assertFileExists($outside.'/sentinel.txt');
 
-        \unlink($outside.'/sentinel.txt');
-        \rmdir($outside);
+        unlink($outside.'/sentinel.txt');
+        rmdir($outside);
     }
 
     #[Test]

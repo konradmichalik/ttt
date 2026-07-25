@@ -17,6 +17,7 @@ use KonradMichalik\Ttt\Fixture\ImageFixtures;
 use PHPUnit\Framework\Attributes\{CoversClass, RequiresPhpExtension, Test};
 use PHPUnit\Framework\TestCase;
 
+use function array_slice;
 use function getimagesize;
 use function unlink;
 
@@ -36,7 +37,7 @@ final class ImageFixturesTest extends TestCase
         $path = ImageFixtures::createPng(32, 16);
 
         self::assertFileExists($path);
-        self::assertSame([32, 16], \array_slice((array) getimagesize($path), 0, 2));
+        self::assertSame([32, 16], array_slice((array) getimagesize($path), 0, 2));
 
         unlink($path);
     }

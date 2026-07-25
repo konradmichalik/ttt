@@ -15,6 +15,7 @@ namespace KonradMichalik\Ttt\Assertion;
 
 use PHPUnit\Framework\Assert;
 
+use function array_key_exists;
 use function explode;
 use function is_array;
 use function is_string;
@@ -51,8 +52,8 @@ trait JsonAssertions
     }
 
     /**
-     * @param string|array<array-key, mixed>  $json
-     * @param list<string>                    $paths
+     * @param string|array<array-key, mixed> $json
+     * @param list<string>                   $paths
      */
     public static function assertJsonHasPaths(string|array $json, array $paths): void
     {
@@ -71,7 +72,7 @@ trait JsonAssertions
             : $json;
 
         foreach (explode('.', $path) as $segment) {
-            if (!is_array($data) || !\array_key_exists($segment, $data)) {
+            if (!is_array($data) || !array_key_exists($segment, $data)) {
                 Assert::fail(sprintf('JSON path "%s" does not exist (missing segment "%s").', $path, $segment));
             }
 

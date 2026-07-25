@@ -13,11 +13,14 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Ttt\Fixture;
 
+use RuntimeException;
+
 use function dirname;
 use function file_put_contents;
 use function implode;
 use function is_dir;
 use function mkdir;
+use function sprintf;
 
 /**
  * LogFixtures.
@@ -38,7 +41,7 @@ final class LogFixtures
     public static function write(string $path, array $lines): void
     {
         if (!is_dir(dirname($path)) && !@mkdir(dirname($path), 0o700, true) && !is_dir(dirname($path))) {
-            throw new \RuntimeException(\sprintf('Unable to create directory "%s".', dirname($path)), 1752561606);
+            throw new RuntimeException(sprintf('Unable to create directory "%s".', dirname($path)), 1752561606);
         }
 
         file_put_contents($path, implode(\PHP_EOL, $lines).\PHP_EOL);

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Ttt\Tests\Registry;
 
+use Closure;
 use KonradMichalik\Ttt\Attribute\{WithEnvVar, WithTypo3ConfVars};
 use KonradMichalik\Ttt\Handler\{ConfVarsHandler, EnvVarHandler};
 use KonradMichalik\Ttt\Registry\SandboxRegistry;
@@ -32,7 +33,7 @@ final class SandboxRegistryTest extends TestCase
     protected function tearDown(): void
     {
         unset($GLOBALS['TYPO3_CONF_VARS']);
-        \putenv('TTT_REGISTRY_VAR');
+        putenv('TTT_REGISTRY_VAR');
         unset($_ENV['TTT_REGISTRY_VAR'], $_SERVER['TTT_REGISTRY_VAR']);
     }
 
@@ -58,12 +59,12 @@ final class SandboxRegistryTest extends TestCase
 
         $registry->applyFor(AnnotatedFixture::class, 'mixedMethod');
 
-        self::assertSame('on', \getenv('TTT_REGISTRY_VAR'));
+        self::assertSame('on', getenv('TTT_REGISTRY_VAR'));
         self::assertTrue($GLOBALS['TYPO3_CONF_VARS']['SYS']['fromClass']);
 
         $registry->restoreAll();
 
-        self::assertFalse(\getenv('TTT_REGISTRY_VAR'));
+        self::assertFalse(getenv('TTT_REGISTRY_VAR'));
     }
 
     #[Test]
@@ -116,7 +117,7 @@ final class AnnotatedFixture
 final readonly class CallbackHandler implements \KonradMichalik\Ttt\Handler\AttributeHandler
 {
     public function __construct(
-        private \Closure $restorer,
+        private Closure $restorer,
     ) {}
 
     public function supports(\KonradMichalik\Ttt\Attribute\TttAttribute $attribute): bool
@@ -124,7 +125,7 @@ final readonly class CallbackHandler implements \KonradMichalik\Ttt\Handler\Attr
         return true;
     }
 
-    public function apply(\KonradMichalik\Ttt\Attribute\TttAttribute $attribute): \Closure
+    public function apply(\KonradMichalik\Ttt\Attribute\TttAttribute $attribute): Closure
     {
         return $this->restorer;
     }

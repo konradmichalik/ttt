@@ -17,6 +17,7 @@ use KonradMichalik\Ttt\Attribute\WithBackendUser;
 use KonradMichalik\Ttt\Handler\BackendUserHandler;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
+use stdClass;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 
 /**
@@ -50,7 +51,7 @@ final class BackendUserHandlerTest extends TestCase
     #[Test]
     public function restoresPreviousGlobal(): void
     {
-        $previous = new \stdClass();
+        $previous = new stdClass();
         $GLOBALS['BE_USER'] = $previous;
 
         $restore = (new BackendUserHandler())->apply(new WithBackendUser());

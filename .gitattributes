@@ -12,6 +12,7 @@
 /.php-cs-fixer.php        export-ignore
 /codecov.yml              export-ignore
 /composer.lock            export-ignore
+/composer-require-checker.json export-ignore
 /Dockerfile               export-ignore
 /mkdocs.yml               export-ignore
 /phpstan.neon             export-ignore

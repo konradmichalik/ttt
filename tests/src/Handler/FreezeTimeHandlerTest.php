@@ -1,0 +1,53 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+ * This file is part of the "ttt" Composer package.
+ *
+ * (c) Konrad Michalik <hej@konradmichalik.dev>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace KonradMichalik\Ttt\Tests\Handler;
+
+use KonradMichalik\Ttt\Attribute\FreezeTime;
+use KonradMichalik\Ttt\Handler\FreezeTimeHandler;
+use PHPUnit\Framework\Attributes\{CoversClass, Test};
+use PHPUnit\Framework\TestCase;
+use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+
+/**
+ * FreezeTimeHandlerTest.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-3.0-or-later
+ */
+#[CoversClass(FreezeTimeHandler::class)]
+final class FreezeTimeHandlerTest extends TestCase
+{
+    protected function tearDown(): void
+    {
+        GeneralUtility::purgeInstances();
+        unset($GLOBALS['EXEC_TIME'], $GLOBALS['SIM_EXEC_TIME'], $GLOBALS['ACCESS_TIME'], $GLOBALS['SIM_ACCESS_TIME']);
+    }
+
+    #[Test]
+    public function pinsDateAspectAndExecutionTimeGlobals(): void
+    {
+        $restore = (new FreezeTimeHandler())->apply(new FreezeTime('2026-07-14T12:00:30Z'));
+
+        $context = GeneralUtility::makeInstance(Context::class);
+
+        self::assertSame(1784030430, $context->getPropertyFromAspect('date', 'timestamp'));
+        self::assertSame(1784030430, $GLOBALS['EXEC_TIME']);
+        self::assertSame(1784030400, $GLOBALS['ACCESS_TIME']);
+
+        $restore();
+
+        self::assertArrayNotHasKey('EXEC_TIME', $GLOBALS);
+    }
+}

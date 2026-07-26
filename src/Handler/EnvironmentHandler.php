@@ -68,7 +68,10 @@ final class EnvironmentHandler implements AttributeHandler
 
         if (null !== $createdPath && (is_dir($createdPath) || is_link($createdPath))) {
             // Fail closed instead of adopting a path we did not create (symlink/pre-creation race).
+            // Defensive: the freshly generated random path cannot already exist.
+            // @codeCoverageIgnoreStart
             throw new RuntimeException(sprintf('Temporary project path "%s" unexpectedly exists.', $createdPath), 1752561603);
+            // @codeCoverageIgnoreEnd
         }
 
         foreach (['', '/public', '/var', '/config'] as $directory) {

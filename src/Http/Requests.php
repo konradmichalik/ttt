@@ -34,7 +34,10 @@ namespace KonradMichalik\Ttt\Http;
  */
 final class Requests
 {
+    // Static-only factory: the constructor exists solely to forbid instantiation.
+    // @codeCoverageIgnoreStart
     private function __construct() {}
+    // @codeCoverageIgnoreEnd
 
     public static function get(string $uri): RequestBuilder
     {

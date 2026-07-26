@@ -33,7 +33,10 @@ use function sprintf;
  */
 final class LogFixtures
 {
+    // Static-only utility: the constructor exists solely to forbid instantiation.
+    // @codeCoverageIgnoreStart
     private function __construct() {}
+    // @codeCoverageIgnoreEnd
 
     /**
      * @param list<string> $lines

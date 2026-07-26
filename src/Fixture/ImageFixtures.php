@@ -36,7 +36,10 @@ use function sys_get_temp_dir;
  */
 final class ImageFixtures
 {
+    // Static-only utility: the constructor exists solely to forbid instantiation.
+    // @codeCoverageIgnoreStart
     private function __construct() {}
+    // @codeCoverageIgnoreEnd
 
     /**
      * @param array{int, int, int} $rgb
@@ -60,7 +63,10 @@ final class ImageFixtures
         $image = imagecreatetruecolor($width, $height);
 
         if (false === $image) {
+            // Defensive: imagecreatetruecolor() cannot fail for the validated dimensions above.
+            // @codeCoverageIgnoreStart
             throw new RuntimeException('Unable to create GD image resource.', 1752561602);
+            // @codeCoverageIgnoreEnd
         }
 
         $color = imagecolorallocate($image, $red, $green, $blue);

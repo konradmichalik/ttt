@@ -27,8 +27,15 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  * @license GPL-3.0-or-later
  */
 #[CoversClass(FreezeTimeHandler::class)]
+#[CoversClass(FreezeTime::class)]
 final class FreezeTimeHandlerTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        // Start each test from a clean baseline so the restorer's unset() branch is exercised.
+        unset($GLOBALS['EXEC_TIME'], $GLOBALS['SIM_EXEC_TIME'], $GLOBALS['ACCESS_TIME'], $GLOBALS['SIM_ACCESS_TIME']);
+    }
+
     protected function tearDown(): void
     {
         GeneralUtility::purgeInstances();
@@ -49,5 +56,22 @@ final class FreezeTimeHandlerTest extends TestCase
         $restore();
 
         self::assertArrayNotHasKey('EXEC_TIME', $GLOBALS);
+    }
+
+    #[Test]
+    public function restoresPreExistingTimeGlobals(): void
+    {
+        $previous = ['EXEC_TIME' => 111, 'SIM_EXEC_TIME' => 222, 'ACCESS_TIME' => 333, 'SIM_ACCESS_TIME' => 444];
+
+        foreach ($previous as $name => $value) {
+            $GLOBALS[$name] = $value;
+        }
+
+        $restore = (new FreezeTimeHandler())->apply(new FreezeTime('2026-07-14T12:00:30Z'));
+        $restore();
+
+        foreach ($previous as $name => $value) {
+            self::assertSame($value, $GLOBALS[$name]);
+        }
     }
 }

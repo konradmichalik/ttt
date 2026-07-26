@@ -27,6 +27,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  * @license GPL-3.0-or-later
  */
 #[CoversClass(SingletonHandler::class)]
+#[CoversClass(WithSingleton::class)]
 final class SingletonHandlerTest extends TestCase
 {
     protected function tearDown(): void

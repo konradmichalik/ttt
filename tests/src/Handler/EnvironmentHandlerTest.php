@@ -15,9 +15,13 @@ namespace KonradMichalik\Ttt\Tests\Handler;
 
 use KonradMichalik\Ttt\Attribute\{InApplicationContext, WithEnvironment};
 use KonradMichalik\Ttt\Handler\{ApplicationContextHandler, EnvironmentHandler};
-use PHPUnit\Framework\Attributes\{CoversClass, Test};
+use PHPUnit\Framework\Attributes\{CoversClass, PreserveGlobalState, RunInSeparateProcess, Test};
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use TYPO3\CMS\Core\Core\Environment;
+
+use function rmdir;
+use function sys_get_temp_dir;
 
 /**
  * EnvironmentHandlerTest.
@@ -27,8 +31,57 @@ use TYPO3\CMS\Core\Core\Environment;
  */
 #[CoversClass(EnvironmentHandler::class)]
 #[CoversClass(ApplicationContextHandler::class)]
+#[CoversClass(WithEnvironment::class)]
+#[CoversClass(InApplicationContext::class)]
 final class EnvironmentHandlerTest extends TestCase
 {
+    #[Test]
+    public function failsWhenTheProjectDirectoryCannotBeCreated(): void
+    {
+        // "/dev/null" is a file, so mkdir() below it is guaranteed to fail.
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionCode(1752561604);
+
+        (new EnvironmentHandler())->apply(new WithEnvironment(temporaryProjectPath: false, projectPath: '/dev/null/ttt'));
+    }
+
+    #[Test]
+    public function cleanupToleratesAnAlreadyRemovedProjectDirectory(): void
+    {
+        $restore = (new EnvironmentHandler())->apply(new WithEnvironment(context: 'Testing'));
+        $projectPath = Environment::getProjectPath();
+
+        // Remove the sandbox out from under the restorer to exercise its "already gone" guard.
+        foreach (['public', 'var', 'config'] as $directory) {
+            @rmdir($projectPath.'/'.$directory);
+        }
+        @rmdir($projectPath);
+        self::assertDirectoryDoesNotExist($projectPath);
+
+        $restore();
+
+        self::assertDirectoryDoesNotExist($projectPath);
+    }
+
+    #[Test]
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function usesTheSystemTemporaryDirectoryAsProjectRootWhenRequested(): void
+    {
+        $temp = sys_get_temp_dir();
+
+        $restore = (new EnvironmentHandler())->apply(new WithEnvironment(temporaryProjectPath: false));
+
+        self::assertSame($temp, Environment::getProjectPath());
+
+        $restore();
+
+        // The system temp root is reused (not created by us); only prune the empty scaffolding.
+        foreach (['public', 'var', 'config'] as $directory) {
+            @rmdir($temp.'/'.$directory);
+        }
+    }
+
     #[Test]
     public function bootstrapsTemporaryProjectAndCleansUp(): void
     {

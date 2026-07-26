@@ -27,6 +27,7 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
  * @license GPL-3.0-or-later
  */
 #[CoversClass(BackendUserHandler::class)]
+#[CoversClass(WithBackendUser::class)]
 final class BackendUserHandlerTest extends TestCase
 {
     protected function tearDown(): void

@@ -68,6 +68,21 @@ final class SandboxRegistryTest extends TestCase
     }
 
     #[Test]
+    public function ignoresMethodAttributesWhenTheMethodDoesNotExist(): void
+    {
+        $registry = new SandboxRegistry([new ConfVarsHandler()]);
+
+        $registry->applyFor(AnnotatedFixture::class, 'methodThatDoesNotExist');
+
+        // Only the class-level attribute applies; the unknown method contributes nothing.
+        self::assertSame('class', $GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename']);
+
+        $registry->restoreAll();
+
+        self::assertArrayNotHasKey('TYPO3_CONF_VARS', $GLOBALS);
+    }
+
+    #[Test]
     public function restoreAllRunsEveryRestorerEvenIfOneThrows(): void
     {
         $order = [];

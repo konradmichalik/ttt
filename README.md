@@ -1,6 +1,6 @@
 <div align="center">
 
-# ttt
+# *ttt*
 
 [![Coverage](https://img.shields.io/coverallsCoverage/github/konradmichalik/ttt?logo=coveralls)](https://coveralls.io/github/konradmichalik/ttt)
 [![CGL](https://img.shields.io/github/actions/workflow/status/konradmichalik/ttt/cgl.yml?label=cgl&logo=github)](https://github.com/konradmichalik/ttt/actions/workflows/cgl.yml)
@@ -9,7 +9,7 @@
 
 </div>
 
-**ttt** stands for **TYPO3 Testing Terrarium** - a PHPUnit testing toolbox for TYPO3 extension development. Like a terrarium, it builds a controlled miniature environment for every single test: `TYPO3_CONF_VARS`, environment variables, application context & more are put in place declaratively via PHP attributes — and are **guaranteed to be cleaned up afterwards**, no matter whether the test passes, fails or errors.
+*ttt* (**TYPO3 Testing Terrarium**) is a PHPUnit testing toolbox for TYPO3 extension development. It puts `TYPO3_CONF_VARS`, environment variables, application context & more in place declaratively via PHP attributes — guaranteed to be cleaned up afterwards, whether the test passes, fails or errors.
 
 **Before:**
 
@@ -64,7 +64,15 @@ Register the extension once in your `phpunit.xml`:
 </extensions>
 ```
 
-That's it — all ttt attributes now work in every test. Attributes can be placed on classes and methods (class level is applied first, method level merges on top) and are repeatable.
+That's it — all *ttt* attributes now work in every test. Attributes can be placed on classes and methods (class level is applied first, method level merges on top) and are repeatable.
+
+- [Available attributes](#available-attributes)
+- [Request kit](#request-kit)
+- [Assertion kit](#assertion-kit)
+- [Contract kit](#contract-kit)
+- [Fixture kit](#fixture-kit)
+- [Why an extension instead of tearDown()?](#why-an-extension-instead-of-teardown)
+- [Without the extension](#without-the-extension)
 
 ### Available attributes
 

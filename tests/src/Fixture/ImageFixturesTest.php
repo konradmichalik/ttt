@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Ttt\Tests\Fixture;
 
+use InvalidArgumentException;
 use KonradMichalik\Ttt\Fixture\ImageFixtures;
 use PHPUnit\Framework\Attributes\{CoversClass, RequiresPhpExtension, Test};
 use PHPUnit\Framework\TestCase;
@@ -40,5 +41,23 @@ final class ImageFixturesTest extends TestCase
         self::assertSame([32, 16], array_slice((array) getimagesize($path), 0, 2));
 
         unlink($path);
+    }
+
+    #[Test]
+    public function rejectsNonPositiveDimensions(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(1752561610);
+
+        ImageFixtures::createPng(0, 10);
+    }
+
+    #[Test]
+    public function rejectsRgbComponentsOutOfRange(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionCode(1752561611);
+
+        ImageFixtures::createPng(8, 8, [300, 0, 0]);
     }
 }

@@ -14,8 +14,9 @@ declare(strict_types=1);
 namespace KonradMichalik\Ttt\Tests\Http;
 
 use KonradMichalik\Ttt\Http\{RequestBuilder, Requests};
-use PHPUnit\Framework\Attributes\{CoversClass, Test};
+use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use TYPO3\CMS\Core\Http\NormalizedParams;
 
 /**
@@ -68,5 +69,45 @@ final class RequestBuilderTest extends TestCase
         self::assertSame(['title' => 'Updated'], $request->getParsedBody());
         self::assertSame('value', $request->getAttribute('custom'));
         self::assertNull($request->getAttribute('normalizedParams'));
+    }
+
+    #[Test]
+    public function appliesCustomHeaderAndServerParam(): void
+    {
+        $request = Requests::get('/api/count')
+            ->withHeader('X-Api-Key', 'secret')
+            ->withServerParam('HTTP_X_FORWARDED_FOR', '203.0.113.1')
+            ->withoutNormalizedParams()
+            ->build();
+
+        self::assertSame('secret', $request->getHeaderLine('X-Api-Key'));
+        self::assertSame('203.0.113.1', $request->getServerParams()['HTTP_X_FORWARDED_FOR']);
+    }
+
+    /**
+     * @return iterable<string, array{string, string}>
+     */
+    public static function factoryMethodProvider(): iterable
+    {
+        yield 'patch' => ['patch', 'PATCH'];
+        yield 'delete' => ['delete', 'DELETE'];
+    }
+
+    #[Test]
+    #[DataProvider('factoryMethodProvider')]
+    public function exposesFactoryForEveryHttpMethod(string $factory, string $expectedMethod): void
+    {
+        $request = Requests::{$factory}('/api/items/1')->withoutNormalizedParams()->build();
+
+        self::assertSame($expectedMethod, $request->getMethod());
+    }
+
+    #[Test]
+    public function requestsFactoryIsNotInstantiable(): void
+    {
+        $constructor = (new ReflectionClass(Requests::class))->getConstructor();
+
+        self::assertNotNull($constructor);
+        self::assertTrue($constructor->isPrivate(), 'Requests must be a static-only factory.');
     }
 }

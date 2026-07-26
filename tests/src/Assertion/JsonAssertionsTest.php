@@ -58,4 +58,15 @@ final class JsonAssertionsTest extends TestCase
             self::assertStringContainsString('missing segment "missing"', $error->getMessage());
         }
     }
+
+    #[Test]
+    public function assertJsonPathFailsWhenTheValueIsMissing(): void
+    {
+        try {
+            self::assertJsonPath(self::JSON, 'result.items.5.uid', 1);
+            self::fail('Expected assertion failure.');
+        } catch (AssertionFailedError $error) {
+            self::assertStringContainsString('does not exist', $error->getMessage());
+        }
+    }
 }

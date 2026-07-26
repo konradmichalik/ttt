@@ -3,7 +3,6 @@
 	"description": "ttt - TYPO3 Testing Terrarium. Declarative test sandboxing via PHP attributes: TYPO3_CONF_VARS, application context, environment and more - applied before the test, guaranteed to be restored afterwards.",
 	"license": "GPL-3.0-or-later",
 	"type": "library",
-	"version": "0.2.0",
 	"keywords": [
 		"ttt",
 		"php",

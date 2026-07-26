@@ -1,16 +1,16 @@
-# ttt in eigenen TYPO3-Extensions nutzen
+# Using ttt in your own TYPO3 extensions
 
-Migrations- und Nutzungsanleitung für den Einsatz von `konradmichalik/ttt` (ttt = TYPO3 Testing Terrarium) in den bestehenden Extension-Test-Suiten (routing, environment-indicator, ai-mate, letter-avatar, file-sync, request-profiler, dump-server, solr-dashboard-widgets).
+Migration and usage guide for adopting `konradmichalik/ttt` (ttt = TYPO3 Testing Terrarium) in the existing extension test suites (routing, environment-indicator, ai-mate, letter-avatar, file-sync, request-profiler, dump-server, solr-dashboard-widgets).
 
 ---
 
-## 1. Installation & Setup
+## 1. Installation & setup
 
 ```bash
 composer require --dev konradmichalik/ttt
 ```
 
-Während der lokalen Entwicklung am Paket selbst (vor dem ersten Packagist-Release) per Path-Repository:
+During local development on the package itself (before the first Packagist release) via a path repository:
 
 ```json
 "repositories": [
@@ -21,7 +21,7 @@ Während der lokalen Entwicklung am Paket selbst (vor dem ersten Packagist-Relea
 }
 ```
 
-Extension einmalig in der PHPUnit-Konfiguration der Extension registrieren (z. B. `Tests/Build/UnitTests.xml` bzw. `phpunit.xml`):
+Register the extension once in the extension's PHPUnit configuration (e.g. `Tests/Build/UnitTests.xml` or `phpunit.xml`):
 
 ```xml
 <extensions>
@@ -29,17 +29,17 @@ Extension einmalig in der PHPUnit-Konfiguration der Extension registrieren (z. B
 </extensions>
 ```
 
-**Wichtig:** Die Registrierung gehört nur in die **Unit-Test**-Konfiguration. Functional Tests laufen weiter unverändert über `typo3/testing-framework` — Terrarium ersetzt dort nichts und stört dort nichts (die Subscriber reagieren nur auf Tests mit Terrarium-Attributen).
+**Important:** The registration belongs only in the **unit test** configuration. Functional tests keep running unchanged via `typo3/testing-framework` — Terrarium replaces nothing there and disturbs nothing there (the subscribers only react to tests carrying Terrarium attributes).
 
 ---
 
-## 2. Migrations-Rezepte (vorher → nachher)
+## 2. Migration recipes (before → after)
 
-### 2.1 TYPO3_CONF_VARS-Setup mit tearDown-Cleanup
+### 2.1 TYPO3_CONF_VARS setup with tearDown cleanup
 
-Das häufigste Muster im Portfolio (233 Fundstellen).
+The most common pattern across the portfolio (233 occurrences).
 
-**Vorher:**
+**Before:**
 
 ```php
 protected function setUp(): void
@@ -54,7 +54,7 @@ protected function tearDown(): void
 }
 ```
 
-**Nachher:**
+**After:**
 
 ```php
 use KonradMichalik\Ttt\Attribute\WithTypo3ConfVars;
@@ -62,13 +62,13 @@ use KonradMichalik\Ttt\Attribute\WithTypo3ConfVars;
 #[WithTypo3ConfVars(['EXTCONF' => ['my_ext' => ['configuration' => ['color' => '#f00']]]])]
 final class HandlerTest extends TestCase
 {
-    // setUp/tearDown entfallen komplett
+    // setUp/tearDown disappear entirely
 }
 ```
 
-Regeln: Klassen-Attribut gilt für alle Tests der Klasse, Methoden-Attribute mergen obendrauf (Methode gewinnt bei Konflikten), das Attribut ist wiederholbar. Der Merge ist ein Deep-Merge — es reicht, den tatsächlich benötigten Teilbaum anzugeben. Restore läuft garantiert, auch wenn der Test hart fehlschlägt.
+Rules: the class attribute applies to all tests of the class, method attributes merge on top (the method wins on conflicts), the attribute is repeatable. The merge is a deep merge — it is enough to specify the subtree you actually need. Restore is guaranteed to run, even when the test fails hard.
 
-Für Manipulationen **mitten im Test** (z. B. Konfiguration ändern und erneut auflösen) gibt es die imperative Variante:
+For manipulations **mid-test** (e.g. changing configuration and resolving it again) there is the imperative variant:
 
 ```php
 use KonradMichalik\Ttt\Traits\ConfVarsSandbox;
@@ -86,18 +86,18 @@ final class HandlerTest extends TestCase
     public function reactsToChangedConfiguration(): void
     {
         $this->setTypo3ConfVars(['EXTCONF' => ['my_ext' => ['mode' => 'a']]]);
-        // ... erste Assertion ...
+        // ... first assertion ...
         $this->setTypo3ConfVars(['EXTCONF' => ['my_ext' => ['mode' => 'b']]]);
-        // ... zweite Assertion ...
+        // ... second assertion ...
     }
 }
 ```
 
 ### 2.2 Environment::initialize in setUpBeforeClass
 
-Der 12× duplizierte Block (letter-avatar, ai-mate, request-profiler, routing).
+The block duplicated 12× (letter-avatar, ai-mate, request-profiler, routing).
 
-**Vorher:**
+**Before:**
 
 ```php
 public static function setUpBeforeClass(): void
@@ -113,7 +113,7 @@ public static function setUpBeforeClass(): void
 }
 ```
 
-**Nachher:**
+**After:**
 
 ```php
 use KonradMichalik\Ttt\Attribute\WithEnvironment;
@@ -122,13 +122,13 @@ use KonradMichalik\Ttt\Attribute\WithEnvironment;
 final class PathUtilityTest extends TestCase {}
 ```
 
-Das temporäre Projektverzeichnis (inkl. `public/`, `var/`, `config/`) wird pro Test erzeugt und danach gelöscht; ein vorher initialisiertes Environment wird exakt wiederhergestellt. Wer ein festes Verzeichnis braucht: `#[WithEnvironment(projectPath: '/pfad', temporaryProjectPath: false)]`.
+The temporary project directory (incl. `public/`, `var/`, `config/`) is created per test and deleted afterwards; a previously initialized Environment is restored exactly. If you need a fixed directory: `#[WithEnvironment(projectPath: '/path', temporaryProjectPath: false)]`.
 
-**Achtung Semantik-Wechsel:** `setUpBeforeClass` lief einmal pro Klasse, das Attribut läuft pro Test. Das ist gewollt (Isolation), kostet aber minimal Laufzeit durch mkdir/rmdir. Bei sehr großen Klassen mit ausschließlich lesenden Zugriffen auf die Pfade ist das vernachlässigbar; falls es je messbar wird, lässt sich ein Klassen-Scope im Paket nachrüsten.
+**Caution, semantic change:** `setUpBeforeClass` ran once per class, the attribute runs per test. This is intended (isolation) but costs minimal runtime through mkdir/rmdir. For very large classes with purely read-only access to the paths this is negligible; should it ever become measurable, a class scope can be added to the package.
 
 ### 2.3 DevelopmentContextTrait (request-profiler)
 
-**Vorher:**
+**Before:**
 
 ```php
 $this->inDevelopmentContext(function (): void {
@@ -136,7 +136,7 @@ $this->inDevelopmentContext(function (): void {
 });
 ```
 
-**Nachher:**
+**After:**
 
 ```php
 use KonradMichalik\Ttt\Attribute\InApplicationContext;
@@ -149,11 +149,11 @@ public function profilingIsActiveInDevelopmentContext(): void
 }
 ```
 
-Der Testkörper wird flach — kein Closure-Wrapping mehr. Voraussetzung: initialisiertes Environment (in Kombination einfach `#[WithEnvironment]` auf die Klasse setzen; die Handler laufen in Deklarationsreihenfolge, Klassen-Attribute vor Methoden-Attributen). Für scoped Wechsel *innerhalb* eines Tests bleibt das alte callable-Muster über den Trait `ApplicationContextSwitcher` verfügbar.
+The test body becomes flat — no more closure wrapping. Prerequisite: an initialized Environment (in combination, simply put `#[WithEnvironment]` on the class; the handlers run in declaration order, class attributes before method attributes). For scoped switches *within* a test the callable pattern remains available via the `ApplicationContextSwitcher` trait.
 
-### 2.4 setSingletonInstance / purgeInstances (request-profiler u. a.)
+### 2.4 setSingletonInstance / purgeInstances (request-profiler and others)
 
-**Vorher:**
+**Before:**
 
 ```php
 protected function setUp(): void
@@ -163,11 +163,11 @@ protected function setUp(): void
 
 protected function tearDown(): void
 {
-    GeneralUtility::purgeInstances(); // wirft ALLE Singletons weg, nicht nur den eigenen
+    GeneralUtility::purgeInstances(); // throws away ALL singletons, not just your own
 }
 ```
 
-**Nachher:**
+**After:**
 
 ```php
 use KonradMichalik\Ttt\Attribute\WithSingleton;
@@ -177,11 +177,11 @@ use KonradMichalik\Ttt\Attribute\WithSingleton;
 public function usesInjectedCacheManager(): void {}
 ```
 
-Zwei Verbesserungen gegenüber dem Handmuster: Es wird die *komplette vorherige Singleton-Map* restauriert (kein Kollateralschaden durch `purgeInstances()`), und dank PHP 8.1+ sind `new`-Ausdrücke direkt im Attribut erlaubt. Alternativ geht ein Class-String, der ohne Konstruktor-Argumente instanziiert wird: `#[WithSingleton(Foo::class, FakeFoo::class)]`.
+Two improvements over the hand-rolled pattern: the *complete previous singleton map* is restored (no collateral damage from `purgeInstances()`), and thanks to PHP 8.1+ `new` expressions are allowed directly in the attribute. Alternatively a class string works, instantiated without constructor arguments: `#[WithSingleton(Foo::class, FakeFoo::class)]`.
 
-### 2.5 BE_USER-Stubs (environment-indicator, file-sync)
+### 2.5 BE_USER stubs (environment-indicator, file-sync)
 
-**Vorher:**
+**Before:**
 
 ```php
 $user = $this->createMock(BackendUserAuthentication::class);
@@ -190,7 +190,7 @@ $GLOBALS['BE_USER'] = $user;
 // tearDown: unset($GLOBALS['BE_USER']);
 ```
 
-**Nachher:**
+**After:**
 
 ```php
 #[Test]
@@ -198,26 +198,26 @@ $GLOBALS['BE_USER'] = $user;
 public function showsIndicatorForAdmins(): void {}
 ```
 
-Der Stub ist eine echte `BackendUserAuthentication`-Subklasse mit gefülltem `user`-Array — `isAdmin()`, `$user->user['uid']` etc. funktionieren ohne Mock-Konfiguration. Wo Tests spezielles Mock-Verhalten brauchen (z. B. `check()`-Erwartungen), beim Mock bleiben; das Attribut deckt den 80-%-Fall „es muss halt ein (Admin-)User da sein" ab.
+The stub is a real `BackendUserAuthentication` subclass with a populated `user` array — `isAdmin()`, `$user->user['uid']` etc. work without mock configuration. Where tests need specific mock behavior (e.g. `check()` expectations), stay with the mock; the attribute covers the 80% case "there just needs to be an (admin) user".
 
-### 2.6 Zeitabhängige Tests
+### 2.6 Time-dependent tests
 
-**Nachher (neu möglich):**
+**After (newly possible):**
 
 ```php
 #[Test]
 #[FreezeTime('2026-07-14T12:00:00Z')]
 public function calculatesExpiryFromNow(): void
 {
-    // Context-'date'-Aspect UND $GLOBALS['EXEC_TIME']/ACCESS_TIME sind gepinnt
+    // The Context 'date' aspect AND $GLOBALS['EXEC_TIME']/ACCESS_TIME are pinned
 }
 ```
 
-Deckt beide Zeitquellen ab, die TYPO3-Code typischerweise nutzt. Code mit rohem `time()`/`new \DateTime()` bleibt davon unberührt — solcher Code ist der eigentliche Refactoring-Kandidat (Context-Aspect injizieren).
+Covers both time sources that TYPO3 code typically uses. Code with raw `time()`/`new \DateTime()` stays unaffected — that code is the actual refactoring candidate (inject the Context aspect).
 
-### 2.7 Handgebaute ServerRequests (routing: 54×, request-profiler: 20×)
+### 2.7 Hand-built ServerRequests (routing: 54×, request-profiler: 20×)
 
-**Vorher:**
+**Before:**
 
 ```php
 $request = (new ServerRequest('https://example.com/api/count', 'GET'))
@@ -225,7 +225,7 @@ $request = (new ServerRequest('https://example.com/api/count', 'GET'))
     ->withAttribute('normalizedParams', NormalizedParams::createFromRequest(...));
 ```
 
-**Nachher:**
+**After:**
 
 ```php
 use KonradMichalik\Ttt\Http\Requests;
@@ -236,18 +236,18 @@ $request = Requests::get('https://example.com/api/count')
     ->build();
 ```
 
-`normalizedParams` wird automatisch als Attribut gesetzt (abschaltbar via `->withoutNormalizedParams()`), JSON-Bodies via `->withJsonBody([...])` inkl. Content-Type-Header. Für Site-/Routing-Attribute: `->withAttribute('site', $site)`.
+`normalizedParams` is set automatically as an attribute (switchable off via `->withoutNormalizedParams()`), JSON bodies via `->withJsonBody([...])` incl. Content-Type header. For site/routing attributes: `->withAttribute('site', $site)`.
 
-### 2.8 JSON-Asserts (ai-mate MCP, routing OpenAPI, request-profiler Artefakte)
+### 2.8 JSON asserts (ai-mate MCP, routing OpenAPI, request-profiler artifacts)
 
-**Vorher:**
+**Before:**
 
 ```php
 $decoded = json_decode((string) $response->getBody(), true);
 self::assertSame(42, $decoded['result']['items'][0]['uid']);
 ```
 
-**Nachher:**
+**After:**
 
 ```php
 use KonradMichalik\Ttt\Assertion\JsonAssertions;
@@ -265,11 +265,11 @@ final class McpResponseTest extends TestCase
 }
 ```
 
-Bei fehlenden Pfaden nennt die Failure-Message das erste fehlende Segment — deutlich schnellere Diagnose als ein `Undefined array key`.
+For missing paths the failure message names the first missing segment — a much faster diagnosis than an `Undefined array key`.
 
-### 2.9 Validierungs-Contracts (environment-indicator: 58 Modifier-Methoden)
+### 2.9 Validation contracts (environment-indicator: 58 modifier methods)
 
-Statt handgeschriebener `testValidateConfigurationFailsWithMissingColor()`-Serien:
+Instead of hand-written `testValidateConfigurationFailsWithMissingColor()` series:
 
 ```php
 use KonradMichalik\Ttt\Contract\ConfigurationValidationContract;
@@ -293,11 +293,11 @@ final class CircleModifierValidationTest extends ConfigurationValidationContract
 }
 ```
 
-Generiert automatisch: fehlender Pflicht-Key, falscher Typ je Key, Unter-/Überschreitung je Range. Extension-spezifische Sonderfälle (z. B. Hex-Format von `color`) als zusätzliche normale `#[Test]`-Methoden in derselben Klasse ergänzen — der Contract ist die Basis, nicht die Obergrenze.
+Automatically generated: missing required key, wrong type per key, under-/overshoot per range. Add extension-specific special cases (e.g. the hex format of `color`) as additional plain `#[Test]` methods in the same class — the contract is the baseline, not the ceiling.
 
-### 2.10 sys_get_temp_dir-Handling & Fixtures (ai-mate: 17×)
+### 2.10 sys_get_temp_dir handling & fixtures (ai-mate: 17×)
 
-Temp-Verzeichnisse für Environment-Zwecke übernimmt `#[WithEnvironment]` (inkl. Cleanup). Für Log- und Bild-Fixtures:
+Temp directories for Environment purposes are handled by `#[WithEnvironment]` (incl. cleanup). For log and image fixtures:
 
 ```php
 use KonradMichalik\Ttt\Fixture\{ImageFixtures, LogFixtures};
@@ -308,61 +308,61 @@ LogFixtures::write($logPath, ['[2026-07-14] ERROR foo']);     // ai-mate LogsCom
 
 ---
 
-## 3. Empfohlene Reihenfolge je Extension
+## 3. Recommended order per extension
 
-| Extension | Zuerst migrieren | Attribute/Kits |
+| Extension | Migrate first | Attributes/kits |
 |---|---|---|
-| **letter-avatar** (Pilot 1) | 5× `Environment::initialize`, 67 ConfVars-Spots | `WithEnvironment`, `WithTypo3ConfVars`, `ImageFixtures` |
-| **request-profiler** (Pilot 2) | `DevelopmentContextTrait`, 12 Singleton-Paare | `InApplicationContext`, `WithSingleton`, `JsonAssertions` |
-| environment-indicator | Modifier-Validierung (58 Methoden), BE_USER-Stubs | `ConfigurationValidationContract`, `WithBackendUser`, `WithTypo3ConfVars` |
-| ai-mate | Temp-Path-Trait, MCP-Asserts, Log-Fixtures | `WithEnvironment`, `JsonAssertions`, `LogFixtures` |
-| routing | Request-Konstruktion (54×) | `Requests`, `JsonAssertions` |
-| dump-server | ConfVars, EnvVar-Flags | `WithTypo3ConfVars`, `WithEnvVar` |
-| file-sync | BE_USER-Stubs | `WithBackendUser` |
-| solr-dashboard-widgets | JSON-Fixtures | `JsonAssertions` |
+| **letter-avatar** (Pilot 1) | 5× `Environment::initialize`, 67 ConfVars spots | `WithEnvironment`, `WithTypo3ConfVars`, `ImageFixtures` |
+| **request-profiler** (Pilot 2) | `DevelopmentContextTrait`, 12 singleton pairs | `InApplicationContext`, `WithSingleton`, `JsonAssertions` |
+| environment-indicator | Modifier validation (58 methods), BE_USER stubs | `ConfigurationValidationContract`, `WithBackendUser`, `WithTypo3ConfVars` |
+| ai-mate | Temp-path trait, MCP asserts, log fixtures | `WithEnvironment`, `JsonAssertions`, `LogFixtures` |
+| routing | Request construction (54×) | `Requests`, `JsonAssertions` |
+| dump-server | ConfVars, EnvVar flags | `WithTypo3ConfVars`, `WithEnvVar` |
+| file-sync | BE_USER stubs | `WithBackendUser` |
+| solr-dashboard-widgets | JSON fixtures | `JsonAssertions` |
 
-Die beiden Piloten decken zusammen alle Attribut-Typen ab — erst nach deren grünem Durchlauf (inkl. Coverage-Diff gegen die phpcov-Baseline) breit ausrollen.
-
----
-
-## 4. Gotchas & Grenzen
-
-- **Restore-Garantie:** läuft über PHPUnits `Test\Finished`-Event, das für jeden Test feuert — auch bei Failures und Errors. Eigene tearDowns für Terrarium-verwaltete Zustände sind nicht nötig und sollten beim Migrieren gelöscht werden (doppeltes Restore ist harmlos, aber toter Code).
-- **Reihenfolge:** Klassen-Attribute werden vor Methoden-Attributen angewendet, Restore läuft LIFO. `#[WithEnvironment]` auf der Klasse + `#[InApplicationContext]` auf der Methode ist damit die korrekte Kombination.
-- **Environment-Limitation:** War das Environment vor dem Test *nicht* initialisiert, bleibt es nach dem Test initialisiert (typed static properties lassen sich nicht de-initialisieren). In Suiten, die komplett auf `#[WithEnvironment]` setzen, ist das irrelevant; gemischte Suiten sollten keine Tests enthalten, die auf *un*initialisiertes Environment angewiesen sind.
-- **getenv-Caveat:** `#[WithEnvVar]` wirkt auf per-Request-Auswertungen. `getenv()`-Aufrufe, die zur Cache-Build-Zeit evaluiert werden (Stichwort `ext_localconf.php`), erreicht es nicht — bekanntes Verhalten aus dem request-profiler.
-- **Functional Tests:** unangetastet lassen. Terrarium ist die Unit-Sandbox; DB-Fixtures, Extension-Loading und `FunctionalTestCase` bleiben Sache von typo3/testing-framework.
-- **Attribut-Instanzen:** `new` in Attribut-Argumenten (für `WithSingleton`) erfordert PHP ≥ 8.1 — im Portfolio überall gegeben.
-- **Mid-Test-Änderungen:** Attribute wirken vor `setUp()`. Wer Zustand *während* des Tests ändern muss, nutzt die Traits (`ConfVarsSandbox`, `ApplicationContextSwitcher`) statt der Attribute.
+Together the two pilots cover all attribute types — only roll out broadly after they pass green (incl. a coverage diff against the phpcov baseline).
 
 ---
 
-## 5. Definition of Done pro Repo-Migration
+## 4. Gotchas & limits
 
-1. phpcov-Baseline vor der Migration erzeugt.
-2. Alle handgeschriebenen setUp/tearDown-Blöcke für Terrarium-verwaltete Zustände entfernt.
-3. Testsuite grün auf der vollen Matrix (PHP × PHPUnit × TYPO3 13/14).
-4. Coverage-Diff gegen Baseline: keine Verluste.
-5. Repo-lokale Helfer-Traits gelöscht, sofern durch Terrarium ersetzt (`WithTemporaryVarPath`, `DevelopmentContextTrait`, `CreatesTestImageTrait`, …).
+- **Restore guarantee:** driven by PHPUnit's `Test\Finished` event, which fires for every test — including failures and errors. Custom tearDowns for Terrarium-managed state are unnecessary and should be deleted when migrating (a double restore is harmless, but dead code).
+- **Order:** class attributes are applied before method attributes, restore runs LIFO. `#[WithEnvironment]` on the class + `#[InApplicationContext]` on the method is therefore the correct combination.
+- **Environment limitation:** if the Environment was *not* initialized before the test, it stays initialized afterwards (typed static properties cannot be de-initialized). In suites that rely entirely on `#[WithEnvironment]` this is irrelevant; mixed suites should not contain tests that depend on an *un*initialized Environment.
+- **getenv caveat:** `#[WithEnvVar]` affects per-request evaluations. `getenv()` calls evaluated at cache-build time (keyword `ext_localconf.php`) are not reached — known behavior from request-profiler.
+- **Functional tests:** leave untouched. Terrarium is the unit sandbox; DB fixtures, extension loading and `FunctionalTestCase` remain the domain of typo3/testing-framework.
+- **Attribute instances:** `new` in attribute arguments (for `WithSingleton`) requires PHP ≥ 8.1 — given everywhere in the portfolio.
+- **Mid-test changes:** attributes take effect before `setUp()`. If you need to change state *during* the test, use the traits (`ConfVarsSandbox`, `ApplicationContextSwitcher`) instead of the attributes.
 
 ---
 
-## 6. Security- & Performance-Notizen (Review-Ergebnis)
+## 5. Definition of Done per repo migration
 
-**Security-Härtungen im Paket (v0.2.x):**
+1. phpcov baseline created before the migration.
+2. All hand-written setUp/tearDown blocks for Terrarium-managed state removed.
+3. Test suite green on the full matrix (PHP × PHPUnit × TYPO3 13/14).
+4. Coverage diff against baseline: no losses.
+5. Repo-local helper traits deleted where replaced by Terrarium (`WithTemporaryVarPath`, `DevelopmentContextTrait`, `CreatesTestImageTrait`, …).
 
-- Der Cleanup temporärer Projektverzeichnisse folgt **keinen Symlinks** — Links werden entfernt statt in ihr Ziel zu rekursieren. Ein Test, der (auch versehentlich) einen Symlink ins Repo anlegt, kann so keinen Datenverlust außerhalb der Sandbox auslösen.
-- Temporäre Pfade nutzen `random_bytes` statt vorhersagbarem `uniqid`; existiert der berechnete Pfad wider Erwarten bereits (Pre-Creation-/Symlink-Race in geteilten `/tmp`-Umgebungen), bricht der Handler mit Exception ab statt den fremden Pfad zu übernehmen.
-- Verzeichnisse werden mit `0700` statt `0777` angelegt; fehlgeschlagenes `mkdir` wirft statt still weiterzulaufen.
-- `#[WithEnvVar]` validiert den Variablennamen (`[A-Za-z_][A-Za-z0-9_]*`) — kein `=`-Injection-Vektor über `putenv()`.
+---
 
-**Bewusst akzeptierte Grenzen (Dev-Only-Threat-Model):**
+## 6. Security & performance notes (review result)
 
-- Attribute sind Entwickler-Code: Class-Strings in `#[WithSingleton]` und Datumsstrings in `#[FreezeTime]` werden nicht weiter sandboxed — wer Testcode schreibt, führt ohnehin Code aus.
-- Die `\assert()`-Typ-Narrowings in den Handlern sind Belt-and-Braces hinter dem `supports()`-Guard der Registry; bei deaktivierten Assertions greift weiterhin die Typprüfung der jeweiligen TYPO3-API (z. B. `setSingletonInstance`).
+**Security hardening in the package (v0.1.x):**
+
+- The cleanup of temporary project directories follows **no symlinks** — links are removed instead of recursing into their target. A test that (even accidentally) creates a symlink into the repo therefore cannot cause data loss outside the sandbox.
+- Temporary paths use `random_bytes` instead of predictable `uniqid`; if the computed path unexpectedly already exists (pre-creation/symlink race in shared `/tmp` environments), the handler aborts with an exception instead of adopting the foreign path.
+- Directories are created with `0700` instead of `0777`; a failed `mkdir` throws instead of silently continuing.
+- `#[WithEnvVar]` validates the variable name (`[A-Za-z_][A-Za-z0-9_]*`) — no `=`-injection vector via `putenv()`.
+
+**Deliberately accepted limits (dev-only threat model):**
+
+- Attributes are developer code: class strings in `#[WithSingleton]` and date strings in `#[FreezeTime]` are not sandboxed further — whoever writes test code runs code anyway.
+- The `\assert()` type narrowings in the handlers are belt-and-braces behind the registry's `supports()` guard; with assertions disabled, the type check of the respective TYPO3 API (e.g. `setSingletonInstance`) still applies.
 
 **Performance:**
 
-- Die Attribut-Auflösung (Reflection) läuft für *jeden* Test und ist deshalb memoized: pro Klasse bzw. pro Klasse+Methode wird genau einmal reflektiert; Wiederholungsläufe (DataProvider-Cases!) treffen nur noch den Cache. Attribut-Instanzen sind readonly DTOs und damit gefahrlos wiederverwendbar.
-- Tests ohne Terrarium-Attribute kosten pro Test einen Cache-Lookup plus leeren Restore-Aufruf — im Mikrosekundenbereich, kein messbarer Suite-Overhead.
-- Der teuerste Handler ist `#[WithEnvironment]` (mkdir/rmdir pro Test). Für I/O-sensible Riesenklassen ggf. auf Klassen-Ebene sparsam einsetzen; ein optionaler Klassen-Scope ist als spätere Erweiterung vorgesehen.
+- The attribute resolution (reflection) runs for *every* test and is therefore memoized: per class resp. per class+method it reflects exactly once; repeat runs (DataProvider cases!) only hit the cache. Attribute instances are readonly DTOs and thus safe to reuse.
+- Tests without Terrarium attributes cost one cache lookup plus an empty restore call per test — in the microsecond range, no measurable suite overhead.
+- The most expensive handler is `#[WithEnvironment]` (mkdir/rmdir per test). For I/O-sensitive huge classes, use it sparingly at class level; an optional class scope is planned as a later extension.

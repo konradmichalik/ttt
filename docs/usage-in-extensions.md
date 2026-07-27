@@ -289,7 +289,7 @@ final class McpResponseTest extends TestCase
 }
 ```
 
-For missing paths the failure message names the first missing segment — a much faster diagnosis than an `Undefined array key`.
+For missing paths the failure message names the first missing segment — a much faster diagnosis than an `Undefined array key`. To assert a path is deliberately **absent** (e.g. an OpenAPI document omitting `servers` for a root-mounted site), use `assertJsonMissingPath()`/`assertJsonMissingPaths()` instead of a manual `assertArrayNotHasKey()` fallback.
 
 ### 2.9 Validation contracts (environment-indicator: 58 modifier methods)
 

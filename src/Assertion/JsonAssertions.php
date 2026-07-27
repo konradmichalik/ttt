@@ -71,6 +71,27 @@ trait JsonAssertions
 
     /**
      * @param string|array<array-key, mixed> $json
+     */
+    public static function assertJsonMissingPath(string|array $json, string $path): void
+    {
+        ['found' => $found] = self::traverseJsonPath($json, $path);
+
+        Assert::assertFalse($found, sprintf('JSON path "%s" unexpectedly exists.', $path));
+    }
+
+    /**
+     * @param string|array<array-key, mixed> $json
+     * @param list<string>                   $paths
+     */
+    public static function assertJsonMissingPaths(string|array $json, array $paths): void
+    {
+        foreach ($paths as $path) {
+            self::assertJsonMissingPath($json, $path);
+        }
+    }
+
+    /**
+     * @param string|array<array-key, mixed> $json
      *
      * @return array{found: bool, value: mixed, missingSegment: string|null}
      */

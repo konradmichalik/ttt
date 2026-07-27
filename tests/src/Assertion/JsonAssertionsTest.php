@@ -69,4 +69,38 @@ final class JsonAssertionsTest extends TestCase
             self::assertStringContainsString('does not exist', $error->getMessage());
         }
     }
+
+    #[Test]
+    public function assertsAbsenceOfPath(): void
+    {
+        self::assertJsonMissingPath(self::JSON, 'result.servers');
+    }
+
+    #[Test]
+    public function assertJsonMissingPathFailsWhenThePathExists(): void
+    {
+        try {
+            self::assertJsonMissingPath(self::JSON, 'result.items.0.uid');
+            self::fail('Expected assertion failure.');
+        } catch (AssertionFailedError $error) {
+            self::assertStringContainsString('JSON path "result.items.0.uid" unexpectedly exists', $error->getMessage());
+        }
+    }
+
+    #[Test]
+    public function assertsAbsenceOfMultiplePaths(): void
+    {
+        self::assertJsonMissingPaths(self::JSON, ['result.servers', 'result.errors']);
+    }
+
+    #[Test]
+    public function assertJsonMissingPathsFailsWhenOnePathExists(): void
+    {
+        try {
+            self::assertJsonMissingPaths(self::JSON, ['result.servers', 'result.items']);
+            self::fail('Expected assertion failure.');
+        } catch (AssertionFailedError $error) {
+            self::assertStringContainsString('JSON path "result.items" unexpectedly exists', $error->getMessage());
+        }
+    }
 }

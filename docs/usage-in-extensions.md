@@ -334,6 +334,7 @@ Together the two pilots cover all attribute types — only roll out broadly afte
 - **Functional tests:** leave untouched. Terrarium is the unit sandbox; DB fixtures, extension loading and `FunctionalTestCase` remain the domain of typo3/testing-framework.
 - **Attribute instances:** `new` in attribute arguments (for `WithSingleton`) requires PHP ≥ 8.1 — given everywhere in the portfolio.
 - **Mid-test changes:** attributes take effect before `setUp()`. If you need to change state *during* the test, use the traits (`ConfVarsSandbox`, `ApplicationContextSwitcher`) instead of the attributes.
+- **`Requests`/`RequestBuilder` without an initialized Environment:** `normalizedParams` is derived via `NormalizedParams::createFromRequest()`, which requires TYPO3's `Environment` to be initialized (e.g. via `#[WithEnvironment]`). If it is not, the attribute is silently omitted rather than throwing — equivalent to calling `->withoutNormalizedParams()` explicitly.
 
 ---
 

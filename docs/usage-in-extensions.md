@@ -93,6 +93,30 @@ final class HandlerTest extends TestCase
 }
 ```
 
+For manipulations mid-test in functional test suites (which don't run with `TttExtension` enabled, so `#[WithEnvVar]` is unavailable there), the same imperative pattern exists for environment variables:
+
+```php
+use KonradMichalik\Ttt\Traits\EnvVarSandbox;
+
+final class SomeFunctionalTest extends FunctionalTestCase
+{
+    use EnvVarSandbox;
+
+    protected function tearDown(): void
+    {
+        $this->restoreEnvVars();
+        parent::tearDown();
+    }
+
+    #[Test]
+    public function acceptsTheConfiguredToken(): void
+    {
+        $this->setEnvVar('MY_EXT_TOKEN', 'secret');
+        // ...
+    }
+}
+```
+
 ### 2.2 Environment::initialize in setUpBeforeClass
 
 The block duplicated 12× (letter-avatar, ai-mate, request-profiler, routing).

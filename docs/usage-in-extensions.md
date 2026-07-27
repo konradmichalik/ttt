@@ -334,6 +334,39 @@ LogFixtures::write($logPath, ['[2026-07-14] ERROR foo']);     // ai-mate LogsCom
 
 ---
 
+### 2.11 Arbitrary $GLOBALS entries
+
+`WithTypo3ConfVars` only covers `$GLOBALS['TYPO3_CONF_VARS']`. For other globals (e.g. `$GLOBALS['TYPO3_REQUEST']`), which otherwise still need manual `unset()`/assignment:
+
+**Before:**
+
+```php
+protected function setUp(): void
+{
+    $this->previousRequest = $GLOBALS['TYPO3_REQUEST'] ?? null;
+    $GLOBALS['TYPO3_REQUEST'] = $request;
+}
+
+protected function tearDown(): void
+{
+    $GLOBALS['TYPO3_REQUEST'] = $this->previousRequest;
+}
+```
+
+**After:**
+
+```php
+use KonradMichalik\Ttt\Attribute\WithGlobal;
+
+#[Test]
+#[WithGlobal('TYPO3_REQUEST', $request)]
+public function resolvesFromCurrentRequest(): void {}
+```
+
+Restores the previous value exactly, including a previously unset key. For `$GLOBALS['TYPO3_CONF_VARS']` specifically, prefer `WithTypo3ConfVars`, which deep-merges instead of overwriting.
+
+---
+
 ## 3. Recommended order per extension
 
 | Extension | Migrate first | Attributes/kits |

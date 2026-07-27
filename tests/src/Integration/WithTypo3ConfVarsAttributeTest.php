@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Ttt\Tests\Integration;
 
-use KonradMichalik\Ttt\Attribute\{WithEnvVar, WithTypo3ConfVars};
+use KonradMichalik\Ttt\Attribute\{WithEnvVar, WithGlobal, WithTypo3ConfVars};
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -57,5 +57,12 @@ final class WithTypo3ConfVarsAttributeTest extends TestCase
     public function envVarAttributeIsApplied(): void
     {
         self::assertSame('1', getenv('TTT_INTEGRATION_VAR'));
+    }
+
+    #[Test]
+    #[WithGlobal('TTT_INTEGRATION_GLOBAL', 'set')]
+    public function globalAttributeIsApplied(): void
+    {
+        self::assertSame('set', $GLOBALS['TTT_INTEGRATION_GLOBAL']);
     }
 }

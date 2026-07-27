@@ -224,6 +224,8 @@ public function showsIndicatorForAdmins(): void {}
 
 The stub is a real `BackendUserAuthentication` subclass with a populated `user` array — `isAdmin()`, `$user->user['uid']` etc. work without mock configuration. Where tests need specific mock behavior (e.g. `check()` expectations), stay with the mock; the attribute covers the 80% case "there just needs to be an (admin) user".
 
+For tests that check backend-user-group membership, pass `groups`: `#[WithBackendUser(groups: [3, 7])]` populates `userGroupsUID` accordingly.
+
 ### 2.6 Time-dependent tests
 
 **After (newly possible):**

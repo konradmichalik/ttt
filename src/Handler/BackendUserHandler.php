@@ -53,6 +53,7 @@ final class BackendUserHandler implements AttributeHandler
             'admin' => $attribute->admin ? 1 : 0,
         ];
         $user->workspace = 0;
+        $user->userGroupsUID = $attribute->groups;
 
         $GLOBALS['BE_USER'] = $user;
 

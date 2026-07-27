@@ -54,6 +54,26 @@ final class BackendUserHandlerTest extends TestCase
     }
 
     #[Test]
+    public function populatesUserGroupsUidForGroupMembershipChecks(): void
+    {
+        $restore = (new BackendUserHandler())->apply(new WithBackendUser(groups: [3, 7]));
+
+        self::assertSame([3, 7], $GLOBALS['BE_USER']->userGroupsUID);
+
+        $restore();
+    }
+
+    #[Test]
+    public function defaultsToNoGroupMemberships(): void
+    {
+        $restore = (new BackendUserHandler())->apply(new WithBackendUser());
+
+        self::assertSame([], $GLOBALS['BE_USER']->userGroupsUID);
+
+        $restore();
+    }
+
+    #[Test]
     public function restoresPreviousGlobal(): void
     {
         $previous = new stdClass();

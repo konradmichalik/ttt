@@ -314,12 +314,16 @@ final class CircleModifierValidationTest extends ConfigurationValidationContract
 
     protected function schema(): array
     {
-        return ['color' => 'string', 'size' => 'float:0..1', 'position?' => 'string'];
+        return [
+            'color' => 'string',
+            'size' => 'float:0..1',
+            'position?' => 'enum:top left|top right|bottom left|bottom right',
+        ];
     }
 }
 ```
 
-Automatically generated: missing required key, wrong type per key, under-/overshoot per range. Add extension-specific special cases (e.g. the hex format of `color`) as additional plain `#[Test]` methods in the same class — the contract is the baseline, not the ceiling.
+Automatically generated: missing required key, wrong type per key, under-/overshoot per range, and (for `enum`) an unrecognized-value case — a known-but-invalid string like `"top center"` for a `position` key restricted to a fixed set. Add extension-specific special cases (e.g. the hex format of `color`) as additional plain `#[Test]` methods in the same class — the contract is the baseline, not the ceiling.
 
 ### 2.10 sys_get_temp_dir handling & fixtures (ai-mate: 17×)
 

@@ -15,6 +15,7 @@ namespace KonradMichalik\Ttt\Tests\Contract;
 
 use KonradMichalik\Ttt\Contract\ConfigurationValidationContract;
 
+use function in_array;
 use function is_array;
 use function is_bool;
 use function is_float;
@@ -56,12 +57,18 @@ final class ConfigurationValidationContractTest extends ConfigurationValidationC
             return false;
         }
 
+        $position = $configuration['position'] ?? null;
+
+        if (!in_array($position, ['top left', 'top right', 'bottom left', 'bottom right'], true)) {
+            return false;
+        }
+
         return true;
     }
 
     protected function validConfiguration(): array
     {
-        return ['color' => '#ff0000', 'size' => 0.5, 'enabled' => true, 'options' => []];
+        return ['color' => '#ff0000', 'size' => 0.5, 'enabled' => true, 'options' => [], 'position' => 'top left'];
     }
 
     protected function schema(): array
@@ -71,6 +78,7 @@ final class ConfigurationValidationContractTest extends ConfigurationValidationC
             'size' => 'float:0..1',
             'enabled' => 'bool',
             'options?' => 'array',
+            'position' => 'enum:top left|top right|bottom left|bottom right',
         ];
     }
 }

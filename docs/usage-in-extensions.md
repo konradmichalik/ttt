@@ -1,6 +1,6 @@
 # Using ttt in your own TYPO3 extensions
 
-Migration and usage guide for adopting `konradmichalik/ttt` (ttt = TYPO3 Testing Terrarium) in the existing extension test suites (routing, environment-indicator, ai-mate, letter-avatar, file-sync, request-profiler, dump-server, solr-dashboard-widgets).
+Migration and usage guide for adopting `konradmichalik/ttt` (ttt = TYPO3 Testing Terrarium) in the existing extension test suites.
 
 ---
 

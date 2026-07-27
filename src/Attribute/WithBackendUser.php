@@ -22,6 +22,10 @@ use Attribute;
  * BackendUserAuthentication subclass with a skipped constructor and a
  * populated user record) and restores the previous global afterwards.
  *
+ * The optional $groups parameter populates userGroupsUID, so
+ * isMemberOfGroup() works for tests that check backend-user-group
+ * membership.
+ *
  * Requires typo3/cms-core.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
@@ -30,9 +34,13 @@ use Attribute;
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
 final readonly class WithBackendUser implements TttAttribute
 {
+    /**
+     * @param list<int> $groups
+     */
     public function __construct(
         public bool $admin = false,
         public int $uid = 1,
         public string $username = 'ttt',
+        public array $groups = [],
     ) {}
 }

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Ttt\Http;
 
+use TypeError;
 use TYPO3\CMS\Core\Http\{NormalizedParams, ServerRequest, Stream};
 
 use function json_encode;
@@ -143,10 +144,14 @@ final class RequestBuilder
         }
 
         if ($this->withNormalizedParams && !isset($this->attributes['normalizedParams'])) {
-            $request = $request->withAttribute(
-                'normalizedParams',
-                NormalizedParams::createFromRequest($request, $GLOBALS['TYPO3_CONF_VARS']['SYS'] ?? []),
-            );
+            try {
+                $request = $request->withAttribute(
+                    'normalizedParams',
+                    NormalizedParams::createFromRequest($request, $GLOBALS['TYPO3_CONF_VARS']['SYS'] ?? []),
+                );
+            } catch (TypeError) {
+                // TYPO3\CMS\Core\Core\Environment was never initialized; normalizedParams cannot be derived.
+            }
         }
 
         return $request;

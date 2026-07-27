@@ -13,8 +13,9 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Ttt\Tests\Http;
 
+use KonradMichalik\Ttt\Attribute\WithEnvironment;
 use KonradMichalik\Ttt\Http\{RequestBuilder, Requests};
-use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
+use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, RunInSeparateProcess, Test};
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use TYPO3\CMS\Core\Http\NormalizedParams;
@@ -30,6 +31,7 @@ use TYPO3\CMS\Core\Http\NormalizedParams;
 final class RequestBuilderTest extends TestCase
 {
     #[Test]
+    #[WithEnvironment]
     public function buildsRequestWithMethodUriAndNormalizedParams(): void
     {
         $request = Requests::get('https://example.com/api/count')
@@ -100,6 +102,15 @@ final class RequestBuilderTest extends TestCase
         $request = Requests::{$factory}('/api/items/1')->withoutNormalizedParams()->build();
 
         self::assertSame($expectedMethod, $request->getMethod());
+    }
+
+    #[Test]
+    #[RunInSeparateProcess]
+    public function degradesGracefullyWhenEnvironmentIsNotInitialized(): void
+    {
+        $request = Requests::get('https://example.com/api/count')->build();
+
+        self::assertNull($request->getAttribute('normalizedParams'));
     }
 
     #[Test]

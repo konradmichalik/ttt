@@ -111,6 +111,7 @@ final class McpResponseTest extends TestCase
     {
         self::assertJsonPath($response, 'result.items.0.uid', 42);
         self::assertJsonHasPaths($response, ['result', 'result.items']);
+        self::assertJsonPathEqualsWithDelta($response, 'result.hitRatio', 0.667, 0.001);
     }
 }
 ```

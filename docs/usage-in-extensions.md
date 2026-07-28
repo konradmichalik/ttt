@@ -68,6 +68,20 @@ final class HandlerTest extends TestCase
 
 Rules: the class attribute applies to all tests of the class, method attributes merge on top (the method wins on conflicts), the attribute is repeatable. The merge is a deep merge — it is enough to specify the subtree you actually need. Restore is guaranteed to run, even when the test fails hard.
 
+Because the deep merge only *adds onto* an existing array subtree, overriding a key with `[]` is a no-op and can't clear a key set by a class-level attribute (e.g. to simulate the "not configured" case). Use the `Typo3ConfVarsSentinel::Unset` marker instead — it removes the key from the merged result:
+
+```php
+use KonradMichalik\Ttt\Attribute\Typo3ConfVarsSentinel;
+
+#[WithTypo3ConfVars(['EXTCONF' => ['my_ext' => ['configuration' => ['color' => '#f00']]]])]
+final class HandlerTest extends TestCase
+{
+    #[Test]
+    #[WithTypo3ConfVars(['EXTCONF' => ['my_ext' => ['configuration' => Typo3ConfVarsSentinel::Unset]]])]
+    public function behavesAsUnconfigured(): void { /* ... */ }
+}
+```
+
 For manipulations **mid-test** (e.g. changing configuration and resolving it again) there is the imperative variant:
 
 ```php
@@ -401,6 +415,7 @@ Together the two pilots cover all attribute types — only roll out broadly afte
 - **Order:** class attributes are applied before method attributes, restore runs LIFO. `#[WithEnvironment]` on the class + `#[InApplicationContext]` on the method is therefore the correct combination.
 - **Environment limitation:** if the Environment was *not* initialized before the test, it stays initialized afterwards (typed static properties cannot be de-initialized). In suites that rely entirely on `#[WithEnvironment]` this is irrelevant; mixed suites should not contain tests that depend on an *un*initialized Environment.
 - **getenv caveat:** `#[WithEnvVar]` affects per-request evaluations. `getenv()` calls evaluated at cache-build time (keyword `ext_localconf.php`) are not reached — known behavior from request-profiler.
+- **Unsetting an env var:** `#[WithEnvVar('NAME', null)]` (or the value argument omitted) unsets the variable across `putenv()`, `$_ENV` and `$_SERVER` instead of setting it, and restores whatever value (or absence) existed before — use it to test behavior when a variable is *not* present.
 - **Functional tests:** leave untouched. Terrarium is the unit sandbox; DB fixtures, extension loading and `FunctionalTestCase` remain the domain of typo3/testing-framework.
 - **`#[WithTypo3ConfVars]` does not survive `FunctionalTestCase`:** the attribute applies via PHPUnit's `PreparationStarted` event, which fires *before* `setUp()`. `FunctionalTestCase::setUp()` reloads `$GLOBALS['TYPO3_CONF_VARS']` from the bootstrapped configuration afterwards, silently discarding whatever the attribute merged in. This is not a bug to fix — it follows directly from the "functional tests: leave untouched" design above. Use the imperative `ConfVarsSandbox` trait (called from `setUp()`/the test body, which runs *after* the framework's own bootstrap) instead.
 - **Attribute instances:** `new` in attribute arguments (for `WithSingleton`) requires PHP ≥ 8.1 — given everywhere in the portfolio.

@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace KonradMichalik\Ttt\Tests\Handler;
 
 use Generator;
-use KonradMichalik\Ttt\Attribute\WithTypo3ConfVars;
+use KonradMichalik\Ttt\Attribute\{Typo3ConfVarsSentinel, WithTypo3ConfVars};
 use KonradMichalik\Ttt\Handler\ConfVarsHandler;
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
@@ -90,6 +90,24 @@ final class ConfVarsHandlerTest extends TestCase
             ['SYS' => ['features' => 'off']],
             ['SYS' => ['features' => ['flag' => true]]],
             ['SYS' => ['features' => ['flag' => true]]],
+        ];
+
+        yield 'sentinel clears a nested key set by an earlier merge' => [
+            ['EXTCONF' => ['my_ext' => ['configuration' => ['color' => '#f00']]]],
+            ['EXTCONF' => ['my_ext' => ['configuration' => Typo3ConfVarsSentinel::Unset]]],
+            ['EXTCONF' => ['my_ext' => []]],
+        ];
+
+        yield 'sentinel clears a top-level key' => [
+            ['SYS' => ['sitename' => 'Base']],
+            ['SYS' => Typo3ConfVarsSentinel::Unset],
+            [],
+        ];
+
+        yield 'sentinel on an absent key is a no-op' => [
+            ['SYS' => ['sitename' => 'Base']],
+            ['EXTCONF' => Typo3ConfVarsSentinel::Unset],
+            ['SYS' => ['sitename' => 'Base']],
         ];
     }
 

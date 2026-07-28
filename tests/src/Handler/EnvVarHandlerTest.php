@@ -88,4 +88,44 @@ final class EnvVarHandlerTest extends TestCase
         self::assertSame('before', $_ENV[self::VAR]);
         self::assertSame('before', $_SERVER[self::VAR]);
     }
+
+    #[Test]
+    public function unsetsVariableFromAllThreeChannelsWhenValueIsNull(): void
+    {
+        putenv(self::VAR.'=before');
+        $_ENV[self::VAR] = 'before';
+        $_SERVER[self::VAR] = 'before';
+
+        $this->subject->apply(new WithEnvVar(self::VAR, null));
+
+        self::assertFalse(getenv(self::VAR));
+        self::assertArrayNotHasKey(self::VAR, $_ENV);
+        self::assertArrayNotHasKey(self::VAR, $_SERVER);
+    }
+
+    #[Test]
+    public function restorerReappliesPreviousValueAfterUnsetting(): void
+    {
+        putenv(self::VAR.'=before');
+        $_ENV[self::VAR] = 'before';
+        $_SERVER[self::VAR] = 'before';
+
+        $restore = $this->subject->apply(new WithEnvVar(self::VAR, null));
+        $restore();
+
+        self::assertSame('before', getenv(self::VAR));
+        self::assertSame('before', $_ENV[self::VAR]);
+        self::assertSame('before', $_SERVER[self::VAR]);
+    }
+
+    #[Test]
+    public function restorerKeepsVariableUnsetWhenItDidNotExistBefore(): void
+    {
+        $restore = $this->subject->apply(new WithEnvVar(self::VAR, null));
+        $restore();
+
+        self::assertFalse(getenv(self::VAR));
+        self::assertArrayNotHasKey(self::VAR, $_ENV);
+        self::assertArrayNotHasKey(self::VAR, $_SERVER);
+    }
 }

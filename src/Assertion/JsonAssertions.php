@@ -51,6 +51,21 @@ trait JsonAssertions
     /**
      * @param string|array<array-key, mixed> $json
      */
+    public static function assertJsonPathEqualsWithDelta(string|array $json, string $path, float $expected, float $delta): void
+    {
+        ['found' => $found, 'value' => $value, 'missingSegment' => $missingSegment] = self::traverseJsonPath($json, $path);
+
+        if (!$found) {
+            Assert::fail(sprintf('JSON path "%s" does not exist (missing segment "%s").', $path, $missingSegment));
+        }
+
+        Assert::assertIsNumeric($value, sprintf('Failed asserting JSON path "%s" is numeric.', $path));
+        Assert::assertEqualsWithDelta($expected, (float) $value, $delta, sprintf('Failed asserting JSON path "%s".', $path));
+    }
+
+    /**
+     * @param string|array<array-key, mixed> $json
+     */
     public static function assertJsonHasPath(string|array $json, string $path): void
     {
         ['found' => $found, 'missingSegment' => $missingSegment] = self::traverseJsonPath($json, $path);

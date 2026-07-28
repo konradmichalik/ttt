@@ -68,6 +68,20 @@ final class HandlerTest extends TestCase
 
 Rules: the class attribute applies to all tests of the class, method attributes merge on top (the method wins on conflicts), the attribute is repeatable. The merge is a deep merge — it is enough to specify the subtree you actually need. Restore is guaranteed to run, even when the test fails hard.
 
+Because the deep merge only *adds onto* an existing array subtree, overriding a key with `[]` is a no-op and can't clear a key set by a class-level attribute (e.g. to simulate the "not configured" case). Use the `Typo3ConfVarsSentinel::Unset` marker instead — it removes the key from the merged result:
+
+```php
+use KonradMichalik\Ttt\Attribute\Typo3ConfVarsSentinel;
+
+#[WithTypo3ConfVars(['EXTCONF' => ['my_ext' => ['configuration' => ['color' => '#f00']]]])]
+final class HandlerTest extends TestCase
+{
+    #[Test]
+    #[WithTypo3ConfVars(['EXTCONF' => ['my_ext' => ['configuration' => Typo3ConfVarsSentinel::Unset]]])]
+    public function behavesAsUnconfigured(): void { /* ... */ }
+}
+```
+
 For manipulations **mid-test** (e.g. changing configuration and resolving it again) there is the imperative variant:
 
 ```php

@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace KonradMichalik\Ttt\Handler;
 
 use Closure;
-use KonradMichalik\Ttt\Attribute\{TttAttribute, WithTypo3ConfVars};
+use KonradMichalik\Ttt\Attribute\{TttAttribute, Typo3ConfVarsSentinel, WithTypo3ConfVars};
 
 use function array_key_exists;
 use function assert;
@@ -65,6 +65,11 @@ final class ConfVarsHandler implements AttributeHandler
     private static function mergeRecursiveWithOverride(array $base, array $override): array
     {
         foreach ($override as $key => $value) {
+            if (Typo3ConfVarsSentinel::Unset === $value) {
+                unset($base[$key]);
+                continue;
+            }
+
             if (is_array($value) && isset($base[$key]) && is_array($base[$key])) {
                 $base[$key] = self::mergeRecursiveWithOverride($base[$key], $value);
                 continue;

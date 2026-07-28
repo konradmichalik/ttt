@@ -25,6 +25,11 @@ use Attribute;
  * if it was NOT initialized before, it stays initialized with neutral values
  * (un-initializing typed static properties is not possible in PHP).
  *
+ * Passing the sentinel 'self' as projectPath roots the sandbox at the
+ * consuming package's own directory (the one containing its composer.json)
+ * instead of a temporary directory - useful when a test resolves absolute
+ * asset paths (fonts, fixtures) that must live inside the extension itself.
+ *
  * Requires typo3/cms-core.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>

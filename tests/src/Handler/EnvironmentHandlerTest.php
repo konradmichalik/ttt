@@ -20,6 +20,7 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use TYPO3\CMS\Core\Core\Environment;
 
+use function dirname;
 use function rmdir;
 use function sys_get_temp_dir;
 
@@ -113,6 +114,16 @@ final class EnvironmentHandlerTest extends TestCase
 
         unlink($outside.'/sentinel.txt');
         rmdir($outside);
+    }
+
+    #[Test]
+    public function resolvesProjectPathToConsumingPackageRootWhenSelfSentinelIsUsed(): void
+    {
+        $restore = (new EnvironmentHandler())->apply(new WithEnvironment(temporaryProjectPath: false, projectPath: 'self'));
+
+        self::assertSame(dirname(__DIR__, 3), Environment::getProjectPath());
+
+        $restore();
     }
 
     #[Test]

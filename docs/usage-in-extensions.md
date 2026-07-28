@@ -162,6 +162,13 @@ final class PathUtilityTest extends TestCase {}
 
 The temporary project directory (incl. `public/`, `var/`, `config/`) is created per test and deleted afterwards; a previously initialized Environment is restored exactly. If you need a fixed directory: `#[WithEnvironment(projectPath: '/path', temporaryProjectPath: false)]`.
 
+If a test resolves an absolute asset path (fonts, image fixtures) that must live *inside the extension itself* via `GeneralUtility::getFileAbsFileName()`, a temporary or otherwise-fixed `projectPath` puts that path outside `Environment::getProjectPath()` and resolution silently returns `''`. Use the `'self'` sentinel instead — it roots the sandbox at the consuming package's own directory (found by walking up from the running test's file to the nearest `composer.json`), so paths inside the extension keep resolving:
+
+```php
+#[WithEnvironment(projectPath: 'self', temporaryProjectPath: false)]
+final class AbstractRenderingTestCase extends TestCase {}
+```
+
 **Caution, semantic change:** `setUpBeforeClass` ran once per class, the attribute runs per test. This is intended (isolation) but costs minimal runtime through mkdir/rmdir. For very large classes with purely read-only access to the paths this is negligible; should it ever become measurable, a class scope can be added to the package.
 
 ### 2.3 DevelopmentContextTrait (request-profiler)

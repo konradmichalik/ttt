@@ -16,12 +16,17 @@ namespace KonradMichalik\Ttt\Handler;
 use Closure;
 use Error;
 use KonradMichalik\Ttt\Attribute\{TttAttribute, WithEnvironment};
+use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 use RuntimeException;
 use TYPO3\CMS\Core\Core\{ApplicationContext, Environment};
 
 use function assert;
 use function bin2hex;
+use function debug_backtrace;
+use function dirname;
 use function is_dir;
+use function is_file;
 use function is_link;
 use function mkdir;
 use function random_bytes;
@@ -56,6 +61,10 @@ final class EnvironmentHandler implements AttributeHandler
 
         $createdPath = null;
         $projectPath = $attribute->projectPath;
+
+        if ('self' === $projectPath) {
+            $projectPath = self::resolveConsumingPackageRoot();
+        }
 
         if (null === $projectPath && $attribute->temporaryProjectPath) {
             $projectPath = sys_get_temp_dir().'/ttt-'.bin2hex(random_bytes(16));
@@ -144,6 +153,54 @@ final class EnvironmentHandler implements AttributeHandler
             $snapshot['currentScript'],
             $snapshot['os'],
         );
+    }
+
+    /**
+     * Walks the call stack for the PHPUnit test case currently executing and
+     * resolves the directory of its own package - the nearest ancestor
+     * directory of the test's declaring file that contains a composer.json.
+     */
+    private static function resolveConsumingPackageRoot(): string
+    {
+        foreach (debug_backtrace(\DEBUG_BACKTRACE_PROVIDE_OBJECT | \DEBUG_BACKTRACE_IGNORE_ARGS) as $frame) {
+            $object = $frame['object'] ?? null;
+
+            if ($object instanceof TestCase) {
+                $file = (new ReflectionClass($object::class))->getFileName();
+
+                if (false !== $file) {
+                    return self::findPackageRoot($file);
+                }
+            }
+        }
+
+        // Defensive: apply() only reaches the 'self' branch while ttt's own
+        // PHPUnit extension is applying attributes for a running test, which
+        // always has a TestCase instance somewhere in the call stack.
+        // @codeCoverageIgnoreStart
+        throw new RuntimeException('Unable to resolve projectPath "self": no PHPUnit\Framework\TestCase found in the call stack.', 1752561612);
+        // @codeCoverageIgnoreEnd
+    }
+
+    private static function findPackageRoot(string $file): string
+    {
+        $directory = dirname($file);
+
+        while (!is_file($directory.'/composer.json')) {
+            $parent = dirname($directory);
+
+            // Defensive: every test file that ttt processes lives inside a
+            // Composer package, so the filesystem root is never reached in practice.
+            // @codeCoverageIgnoreStart
+            if ($parent === $directory) {
+                throw new RuntimeException(sprintf('Unable to resolve projectPath "self": no composer.json found above "%s".', $file), 1752561613);
+            }
+            // @codeCoverageIgnoreEnd
+
+            $directory = $parent;
+        }
+
+        return $directory;
     }
 
     private static function removeDirectory(string $path): void

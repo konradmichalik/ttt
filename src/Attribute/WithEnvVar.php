@@ -23,9 +23,15 @@ use Attribute;
  * getenv() calls evaluated at cache-build time (e.g. in ext_localconf.php)
  * are NOT affected - this attribute targets per-request evaluations only.
  *
+ * Passing null as the value unsets the variable across all three channels
+ * instead of setting it, e.g. to test behaviour when a variable is absent.
+ *
  * <code>
  * #[WithEnvVar('TYPO3_REQUEST_PROFILER_FORCE', '1')]
  * public function honoursForceFlag(): void {}
+ *
+ * #[WithEnvVar('DDEV_APPROOT', null)]
+ * public function honoursMissingDdevApproot(): void {}
  * </code>
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
@@ -36,6 +42,6 @@ final readonly class WithEnvVar implements TttAttribute
 {
     public function __construct(
         public string $name,
-        public string $value,
+        public ?string $value = null,
     ) {}
 }

@@ -13,9 +13,12 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Ttt\Tests\Integration;
 
-use KonradMichalik\Ttt\Attribute\{WithEnvVar, WithGlobal, WithTypo3ConfVars};
+use KonradMichalik\Ttt\Attribute\{WithEnvVar, WithEnvironment, WithGlobal, WithTypo3ConfVars};
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use TYPO3\CMS\Core\Core\Environment;
+
+use function dirname;
 
 /**
  * WithTypo3ConfVarsAttributeTest.
@@ -64,5 +67,12 @@ final class WithTypo3ConfVarsAttributeTest extends TestCase
     public function globalAttributeIsApplied(): void
     {
         self::assertSame('set', $GLOBALS['TTT_INTEGRATION_GLOBAL']);
+    }
+
+    #[Test]
+    #[WithEnvironment(temporaryProjectPath: false, projectPath: 'self')]
+    public function environmentAttributeResolvesSelfProjectPathBeforeSetUp(): void
+    {
+        self::assertSame(dirname(__DIR__, 3), Environment::getProjectPath());
     }
 }

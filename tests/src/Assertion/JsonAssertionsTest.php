@@ -94,6 +94,34 @@ final class JsonAssertionsTest extends TestCase
     }
 
     #[Test]
+    public function assertsFloatValueAtDotPathWithinDelta(): void
+    {
+        self::assertJsonPathEqualsWithDelta(['ratio' => 0.6667], 'ratio', 0.667, 0.001);
+    }
+
+    #[Test]
+    public function assertJsonPathEqualsWithDeltaFailsWhenOutsideDelta(): void
+    {
+        try {
+            self::assertJsonPathEqualsWithDelta(['ratio' => 0.5], 'ratio', 0.667, 0.001);
+            self::fail('Expected assertion failure.');
+        } catch (AssertionFailedError $error) {
+            self::assertStringContainsString('Failed asserting JSON path "ratio"', $error->getMessage());
+        }
+    }
+
+    #[Test]
+    public function assertJsonPathEqualsWithDeltaFailsWhenTheValueIsMissing(): void
+    {
+        try {
+            self::assertJsonPathEqualsWithDelta(self::JSON, 'result.items.5.uid', 1.0, 0.1);
+            self::fail('Expected assertion failure.');
+        } catch (AssertionFailedError $error) {
+            self::assertStringContainsString('does not exist', $error->getMessage());
+        }
+    }
+
+    #[Test]
     public function assertJsonMissingPathsFailsWhenOnePathExists(): void
     {
         try {

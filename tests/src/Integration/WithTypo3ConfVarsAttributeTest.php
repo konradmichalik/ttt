@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Ttt\Tests\Integration;
 
-use KonradMichalik\Ttt\Attribute\{WithEnvVar, WithGlobal, WithTypo3ConfVars};
+use KonradMichalik\Ttt\Attribute\{Typo3ConfVarsSentinel, WithEnvVar, WithGlobal, WithTypo3ConfVars};
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -50,6 +50,13 @@ final class WithTypo3ConfVarsAttributeTest extends TestCase
     {
         self::assertTrue($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['terrarium']['classLevel']);
         self::assertSame('wins', $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['terrarium']['methodLevel']);
+    }
+
+    #[Test]
+    #[WithTypo3ConfVars(['EXTCONF' => ['terrarium' => ['classLevel' => Typo3ConfVarsSentinel::Unset]]])]
+    public function methodLevelSentinelClearsClassLevelKey(): void
+    {
+        self::assertArrayNotHasKey('classLevel', $GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['terrarium']);
     }
 
     #[Test]

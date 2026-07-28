@@ -55,9 +55,14 @@ final class EnvVarHandler implements AttributeHandler
         $previousServer = array_key_exists($name, $_SERVER) ? $_SERVER[$name] : null;
         $serverExisted = array_key_exists($name, $_SERVER);
 
-        putenv(sprintf('%s=%s', $name, $attribute->value));
-        $_ENV[$name] = $attribute->value;
-        $_SERVER[$name] = $attribute->value;
+        if (null === $attribute->value) {
+            putenv($name);
+            unset($_ENV[$name], $_SERVER[$name]);
+        } else {
+            putenv(sprintf('%s=%s', $name, $attribute->value));
+            $_ENV[$name] = $attribute->value;
+            $_SERVER[$name] = $attribute->value;
+        }
 
         return static function () use ($name, $previous, $previousEnv, $envExisted, $previousServer, $serverExisted): void {
             if (false === $previous) {

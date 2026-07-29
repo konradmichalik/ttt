@@ -17,8 +17,11 @@ use KonradMichalik\Ttt\Attribute\WithEnvironment;
 use KonradMichalik\Ttt\Http\{RequestBuilder, Requests};
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, RunInSeparateProcess, Test};
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ServerRequestInterface;
 use ReflectionClass;
+use Throwable;
 use TYPO3\CMS\Core\Http\NormalizedParams;
+use TYPO3\CMS\Core\Site\Entity\Site;
 
 /**
  * RequestBuilderTest.
@@ -120,5 +123,73 @@ final class RequestBuilderTest extends TestCase
 
         self::assertNotNull($constructor);
         self::assertTrue($constructor->isPrivate(), 'Requests must be a static-only factory.');
+    }
+
+    #[Test]
+    public function withSiteSettingsExposesFlatSettingsViaGet(): void
+    {
+        $request = Requests::get('/api/count')
+            ->withSiteSettings(['maintenance' => false])
+            ->withoutNormalizedParams()
+            ->build();
+
+        self::assertFalse($this->siteFromRequest($request)->getSettings()->get('maintenance'));
+    }
+
+    #[Test]
+    public function withSiteSettingsExposesNestedSettingsViaDotPath(): void
+    {
+        $request = Requests::get('/api/count')
+            ->withSiteSettings(['maintenance' => ['enabled' => true]])
+            ->withoutNormalizedParams()
+            ->build();
+
+        self::assertTrue($this->siteFromRequest($request)->getSettings()->get('maintenance.enabled'));
+    }
+
+    #[Test]
+    public function withSiteSettingsFallsBackToDefaultForUnknownKey(): void
+    {
+        $request = Requests::get('/api/count')
+            ->withSiteSettings(['maintenance' => false])
+            ->withoutNormalizedParams()
+            ->build();
+
+        self::assertSame('fallback', $this->siteFromRequest($request)->getSettings()->get('unknown.key', 'fallback'));
+    }
+
+    #[Test]
+    public function withSiteSettingsLeavesOtherSiteMethodsUnconfigured(): void
+    {
+        $request = Requests::get('/api/count')
+            ->withSiteSettings(['maintenance' => false])
+            ->withoutNormalizedParams()
+            ->build();
+
+        $site = $this->siteFromRequest($request);
+
+        $this->expectException(Throwable::class);
+        $site->getIdentifier();
+    }
+
+    #[Test]
+    public function withSiteSettingsComposesWithOtherBuilderMethods(): void
+    {
+        $request = Requests::post('/api/items')
+            ->withSiteSettings(['maintenance' => false])
+            ->withJsonBody(['title' => 'Terrarium'])
+            ->withoutNormalizedParams()
+            ->build();
+
+        self::assertFalse($this->siteFromRequest($request)->getSettings()->get('maintenance'));
+        self::assertSame('application/json', $request->getHeaderLine('Content-Type'));
+    }
+
+    private function siteFromRequest(ServerRequestInterface $request): Site
+    {
+        $site = $request->getAttribute('site');
+        self::assertInstanceOf(Site::class, $site);
+
+        return $site;
     }
 }

@@ -17,6 +17,7 @@ use KonradMichalik\Ttt\Attribute\WithEnvironment;
 use KonradMichalik\Ttt\Http\{RequestBuilder, Requests};
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, RunInSeparateProcess, Test};
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ServerRequestInterface;
 use ReflectionClass;
 use Throwable;
 use TYPO3\CMS\Core\Http\NormalizedParams;
@@ -132,9 +133,7 @@ final class RequestBuilderTest extends TestCase
             ->withoutNormalizedParams()
             ->build();
 
-        $site = $request->getAttribute('site');
-        self::assertInstanceOf(Site::class, $site);
-        self::assertFalse($site->getSettings()->get('maintenance'));
+        self::assertFalse($this->siteFromRequest($request)->getSettings()->get('maintenance'));
     }
 
     #[Test]
@@ -145,9 +144,7 @@ final class RequestBuilderTest extends TestCase
             ->withoutNormalizedParams()
             ->build();
 
-        $site = $request->getAttribute('site');
-        self::assertInstanceOf(Site::class, $site);
-        self::assertTrue($site->getSettings()->get('maintenance.enabled'));
+        self::assertTrue($this->siteFromRequest($request)->getSettings()->get('maintenance.enabled'));
     }
 
     #[Test]
@@ -158,9 +155,7 @@ final class RequestBuilderTest extends TestCase
             ->withoutNormalizedParams()
             ->build();
 
-        $site = $request->getAttribute('site');
-        self::assertInstanceOf(Site::class, $site);
-        self::assertSame('fallback', $site->getSettings()->get('unknown.key', 'fallback'));
+        self::assertSame('fallback', $this->siteFromRequest($request)->getSettings()->get('unknown.key', 'fallback'));
     }
 
     #[Test]
@@ -171,8 +166,7 @@ final class RequestBuilderTest extends TestCase
             ->withoutNormalizedParams()
             ->build();
 
-        $site = $request->getAttribute('site');
-        self::assertInstanceOf(Site::class, $site);
+        $site = $this->siteFromRequest($request);
 
         $this->expectException(Throwable::class);
         $site->getIdentifier();
@@ -187,9 +181,15 @@ final class RequestBuilderTest extends TestCase
             ->withoutNormalizedParams()
             ->build();
 
+        self::assertFalse($this->siteFromRequest($request)->getSettings()->get('maintenance'));
+        self::assertSame('application/json', $request->getHeaderLine('Content-Type'));
+    }
+
+    private function siteFromRequest(ServerRequestInterface $request): Site
+    {
         $site = $request->getAttribute('site');
         self::assertInstanceOf(Site::class, $site);
-        self::assertFalse($site->getSettings()->get('maintenance'));
-        self::assertSame('application/json', $request->getHeaderLine('Content-Type'));
+
+        return $site;
     }
 }

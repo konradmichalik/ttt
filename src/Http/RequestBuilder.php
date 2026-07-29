@@ -15,6 +15,7 @@ namespace KonradMichalik\Ttt\Http;
 
 use TypeError;
 use TYPO3\CMS\Core\Http\{NormalizedParams, ServerRequest, Stream};
+use TYPO3\CMS\Core\Site\Entity\{Site, SiteSettings};
 
 use function json_encode;
 
@@ -111,6 +112,30 @@ final class RequestBuilder
         $this->attributes[$name] = $value;
 
         return $this;
+    }
+
+    /**
+     * Sets the "site" attribute to a Site stub whose getSettings() returns a
+     * real SiteSettings instance built from $settings. Other Site methods are
+     * intentionally left unconfigured (calling them fails), since
+     * SiteSettings is final and readonly and therefore cannot be mocked.
+     *
+     * @param array<string, mixed> $settings
+     */
+    public function withSiteSettings(array $settings): self
+    {
+        $siteSettings = SiteSettings::createFromSettingsTree($settings);
+
+        $site = new class($siteSettings) extends Site {
+            public function __construct(private readonly SiteSettings $siteSettings) {}
+
+            public function getSettings(): SiteSettings
+            {
+                return $this->siteSettings;
+            }
+        };
+
+        return $this->withAttribute('site', $site);
     }
 
     public function withoutNormalizedParams(): self

@@ -12,6 +12,8 @@
 		"TYPO3\\CMS\\Core\\Http\\NormalizedParams",
 		"TYPO3\\CMS\\Core\\Http\\ServerRequest",
 		"TYPO3\\CMS\\Core\\Http\\Stream",
+		"TYPO3\\CMS\\Core\\Site\\Entity\\Site",
+		"TYPO3\\CMS\\Core\\Site\\Entity\\SiteSettings",
 		"TYPO3\\CMS\\Core\\SingletonInterface",
 		"TYPO3\\CMS\\Core\\Utility\\GeneralUtility"
 	]

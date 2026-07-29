@@ -283,7 +283,33 @@ $request = Requests::get('https://example.com/api/count')
     ->build();
 ```
 
-`normalizedParams` is set automatically as an attribute (switchable off via `->withoutNormalizedParams()`), JSON bodies via `->withJsonBody([...])` incl. Content-Type header. For site/routing attributes: `->withAttribute('site', $site)`.
+`normalizedParams` is set automatically as an attribute (switchable off via `->withoutNormalizedParams()`), JSON bodies via `->withJsonBody([...])` incl. Content-Type header. For arbitrary site/routing attributes: `->withAttribute('site', $site)`.
+
+#### 2.7.1 Site settings (extensions reading TypoScript Site Settings)
+
+**Before:**
+
+```php
+private function createRequest(array $settings): ServerRequestInterface
+{
+    $siteSettings = $this->createMock(SiteSettings::class);
+    $siteSettings->method('get')->willReturnMap(...);
+    $site = $this->createMock(Site::class);
+    $site->method('getSettings')->willReturn($siteSettings);
+
+    return (new ServerRequest(...))->withAttribute('site', $site);
+}
+```
+
+**After:**
+
+```php
+$request = Requests::get('/api/count')
+    ->withSiteSettings(['maintenance' => false])
+    ->build();
+```
+
+`withSiteSettings()` builds a *real* `SiteSettings` instance (via `SiteSettings::createFromSettingsTree()`), not a mock — `SiteSettings` is `final readonly` in TYPO3 13.4/14.0 and therefore cannot be mocked with PHPUnit. `get()`/`has()` behave exactly like production, including dot-path lookups for nested settings (`->withSiteSettings(['maintenance' => ['enabled' => true]])` → `get('maintenance.enabled')`). The `Site` object returned as the `'site'` attribute only has `getSettings()` wired up; calling any other `Site` method (`getIdentifier()`, `getRootPageId()`, ...) fails, same "covers the 80% case" scope as [`WithBackendUser`](#25-be_user-stubs-environment-indicator-file-sync).
 
 ### 2.8 JSON asserts (ai-mate MCP, routing OpenAPI, request-profiler artifacts)
 

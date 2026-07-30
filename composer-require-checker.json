@@ -16,6 +16,7 @@
 		"TYPO3\\CMS\\Core\\Site\\Entity\\Site",
 		"TYPO3\\CMS\\Core\\Site\\Entity\\SiteSettings",
 		"TYPO3\\CMS\\Core\\SingletonInterface",
-		"TYPO3\\CMS\\Core\\Utility\\GeneralUtility"
+		"TYPO3\\CMS\\Core\\Utility\\GeneralUtility",
+		"TYPO3\\CMS\\Frontend\\Authentication\\FrontendUserAuthentication"
 	]
 }

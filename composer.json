@@ -32,10 +32,12 @@
 		"phpstan/phpstan": "^2.0",
 		"phpstan/phpstan-phpunit": "^2.0",
 		"rector/rector": "^2.2",
-		"typo3/cms-core": "^13.4 || ^14.0"
+		"typo3/cms-core": "^13.4 || ^14.0",
+		"typo3/cms-frontend": "^13.4 || ^14.0"
 	},
 	"suggest": {
-		"typo3/cms-core": "Required for TYPO3-specific attributes like InApplicationContext and WithEnvironment (^13.4 || ^14.0)"
+		"typo3/cms-core": "Required for TYPO3-specific attributes like InApplicationContext and WithEnvironment (^13.4 || ^14.0)",
+		"typo3/cms-frontend": "Required for WithFrontendUser (^13.4 || ^14.0)"
 	},
 	"autoload": {
 		"psr-4": {

@@ -85,6 +85,9 @@ That's it — all *ttt* attributes now work in every test. Attributes can be pla
 | `#[WithSingleton(Foo::class, new FakeFoo())]` | Registers a singleton via `GeneralUtility`, restores the previous singleton map | typo3/cms-core |
 | `#[WithBackendUser(admin: true)]` | Provides a lightweight `$GLOBALS['BE_USER']` stub | typo3/cms-core |
 | `#[FreezeTime('2026-07-14T12:00:00Z')]` | Pins the Context date aspect and `EXEC_TIME` globals | typo3/cms-core |
+| `#[WithStaticProperty(Foo::class, 'bar', 'value')]` | Generic escape hatch: overwrites any static property via reflection, full restore afterwards | — |
+
+`#[WithStaticProperty]` is a fallback for the long tail of static state that has no dedicated attribute yet — prefer a dedicated attribute where one exists. A readonly static property or one that is not yet initialized fails loudly instead of being silently (mis)applied.
 
 ### Request kit
 

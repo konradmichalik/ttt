@@ -41,6 +41,12 @@ final class ApplicationContextHandler implements AttributeHandler
     {
         assert($attribute instanceof InApplicationContext);
 
+        FunctionalTestCaseGuard::assertNotFunctionalTestCase(
+            'InApplicationContext',
+            'the DI container was already compiled with the previous context',
+            'use a separate FunctionalTestCase class bootstrapped with the desired context instead',
+        );
+
         try {
             $previousContext = (string) Environment::getContext();
         } catch (Error) {

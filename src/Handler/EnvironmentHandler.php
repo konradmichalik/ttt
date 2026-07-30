@@ -57,6 +57,12 @@ final class EnvironmentHandler implements AttributeHandler
     {
         assert($attribute instanceof WithEnvironment);
 
+        FunctionalTestCaseGuard::assertNotFunctionalTestCase(
+            'WithEnvironment',
+            'the framework initializes Environment itself during bootstrap',
+            'let typo3/testing-framework manage the Environment; there is no attribute equivalent for functional tests',
+        );
+
         $snapshot = self::snapshot();
 
         $createdPath = null;

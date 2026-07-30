@@ -12,6 +12,7 @@ declare(strict_types=1);
  */
 
 use Rector\Config\RectorConfig;
+use Rector\Php55\Rector\String_\StringClassNameToClassConstantRector;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\TypeDeclaration\Rector\ClassMethod\AddVoidReturnTypeWhereNoReturnRector;
 use Rector\ValueObject\PhpVersion;
@@ -27,5 +28,13 @@ return RectorConfig::configure()
     ])
     ->withRules([
         AddVoidReturnTypeWhereNoReturnRector::class,
+    ])
+    ->withSkip([
+        // FunctionalTestCaseGuard deliberately uses a string literal instead of ::class:
+        // typo3/testing-framework is never a dependency, so the class may not exist to reference,
+        // and ::class there would break PHPStan's class.notFound check.
+        StringClassNameToClassConstantRector::class => [
+            __DIR__.'/src/Handler/FunctionalTestCaseGuard.php',
+        ],
     ])
 ;

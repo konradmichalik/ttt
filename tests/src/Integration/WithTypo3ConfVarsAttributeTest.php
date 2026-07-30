@@ -23,8 +23,9 @@ use function dirname;
 /**
  * WithTypo3ConfVarsAttributeTest.
  *
- * End-to-end proof that the TttExtension (registered in phpunit.xml)
- * applies attributes before setUp() and restores state after each test. The
+ * End-to-end proof that the TttExtension (registered in phpunit.xml) applies
+ * attributes after setUp() (and any #[Before]/#[PreCondition] hooks), right
+ * before the test method body runs, and restores state after each test. The
  * unannotated test verifies restoration independent of execution order, as
  * the process-wide baseline contains no TYPO3_CONF_VARS.
  *
@@ -42,9 +43,10 @@ final class WithTypo3ConfVarsAttributeTest extends TestCase
     }
 
     #[Test]
-    public function classLevelAttributeIsAppliedBeforeSetUp(): void
+    public function classLevelAttributeIsAppliedAfterSetUpAndBeforeTestBody(): void
     {
-        self::assertTrue($this->observedInSetUp);
+        self::assertNull($this->observedInSetUp);
+        self::assertTrue($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['terrarium']['classLevel']);
     }
 
     #[Test]
@@ -78,7 +80,7 @@ final class WithTypo3ConfVarsAttributeTest extends TestCase
 
     #[Test]
     #[WithEnvironment(temporaryProjectPath: false, projectPath: 'self')]
-    public function environmentAttributeResolvesSelfProjectPathBeforeSetUp(): void
+    public function environmentAttributeResolvesSelfProjectPath(): void
     {
         self::assertSame(dirname(__DIR__, 3), Environment::getProjectPath());
     }

@@ -15,9 +15,8 @@ namespace KonradMichalik\Ttt\Handler;
 
 use Closure;
 use KonradMichalik\Ttt\Attribute\{TttAttribute, WithBackendUser};
-use ReflectionProperty;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
-use TYPO3\CMS\Core\Context\{AspectInterface, Context, UserAspect};
+use TYPO3\CMS\Core\Context\{Context, UserAspect};
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 use function array_key_exists;
@@ -30,10 +29,6 @@ use function assert;
  * stub (constructor skipped, user record populated) into $GLOBALS['BE_USER'],
  * registers it as the Context's backend.user aspect, and restores both
  * afterwards.
- *
- * Context::hasAspect() returns true unconditionally for backend.user (one of
- * six default aspects), so prior presence is snapshotted via reflection on
- * the protected Context::$aspects array instead.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-3.0-or-later
@@ -66,26 +61,16 @@ final class BackendUserHandler implements AttributeHandler
         $GLOBALS['BE_USER'] = $user;
 
         $context = GeneralUtility::makeInstance(Context::class);
-        $aspectsProperty = new ReflectionProperty(Context::class, 'aspects');
-        /** @var array<string, AspectInterface> $aspectsSnapshot */
-        $aspectsSnapshot = $aspectsProperty->getValue($context);
-        $existedAspect = array_key_exists('backend.user', $aspectsSnapshot);
-        $previousAspect = $aspectsSnapshot['backend.user'] ?? null;
+        $restoreAspect = ContextAspectSandbox::apply($context, 'backend.user', new UserAspect($user, $attribute->groups));
 
-        $context->setAspect('backend.user', new UserAspect($user, $attribute->groups));
-
-        return static function () use ($existedGlobal, $previousGlobal, $context, $existedAspect, $previousAspect): void {
+        return static function () use ($existedGlobal, $previousGlobal, $restoreAspect): void {
             if ($existedGlobal) {
                 $GLOBALS['BE_USER'] = $previousGlobal;
             } else {
                 unset($GLOBALS['BE_USER']);
             }
 
-            if ($existedAspect && null !== $previousAspect) {
-                $context->setAspect('backend.user', $previousAspect);
-            } else {
-                $context->unsetAspect('backend.user');
-            }
+            $restoreAspect();
         };
     }
 }

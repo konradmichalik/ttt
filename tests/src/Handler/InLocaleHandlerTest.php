@@ -52,14 +52,22 @@ final class InLocaleHandlerTest extends TestCase
     public function setsAndRestoresTheLocaleForTheGivenCategory(): void
     {
         setlocale(\LC_CTYPE, 'C');
+        $baseline = setlocale(\LC_CTYPE, '0');
+        self::assertIsString($baseline);
+
+        // 'POSIX' is a guaranteed-available alias for 'C' on POSIX systems, but
+        // platforms differ on whether setlocale() then reports back 'POSIX' or
+        // normalizes it to 'C' - learn the expected value instead of assuming it.
+        $expected = setlocale(\LC_CTYPE, 'POSIX');
+        setlocale(\LC_CTYPE, $baseline);
 
         $restore = $this->subject->apply(new InLocale(\LC_CTYPE, 'POSIX'));
 
-        self::assertSame('POSIX', setlocale(\LC_CTYPE, '0'));
+        self::assertSame($expected, setlocale(\LC_CTYPE, '0'));
 
         $restore();
 
-        self::assertSame('C', setlocale(\LC_CTYPE, '0'));
+        self::assertSame($baseline, setlocale(\LC_CTYPE, '0'));
     }
 
     #[Test]

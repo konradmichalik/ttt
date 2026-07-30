@@ -74,23 +74,20 @@ That's it: all *ttt* attributes now work in every test. Attributes can be placed
 
 | Attribute | Purpose |
 |---|---|
-| [`#[WithTypo3ConfVars([...])]`](docs/attributes/with-typo3-conf-vars.md) | Deep-merges configuration into `$GLOBALS['TYPO3_CONF_VARS']`, full restore afterwards |
-| [`#[WithTca('tt_content', [...])]`](docs/attributes/with-tca.md) | Deep-merges configuration into `$GLOBALS['TCA'][$table]`, full restore afterwards |
-| [`#[WithGlobal('KEY', $value)]`](docs/attributes/with-global.md) | Sets an arbitrary `$GLOBALS` entry, full restore afterwards (incl. previously unset keys) |
-| [`#[WithEnvVar('NAME', 'value')]`](docs/attributes/with-env-var.md) | Sets an environment variable (`putenv()`, `$_ENV`, `$_SERVER`), restores all three channels |
-| [`#[WithEnvironment(...)]`](docs/attributes/with-environment.md) 🧪 | Bootstraps `Environment::initialize()` in a temporary project directory incl. cleanup |
-| [`#[InApplicationContext('Development')]`](docs/attributes/in-application-context.md) 🧪 | Switches the TYPO3 application context for one test |
-| [`#[WithSingleton(Foo::class, new FakeFoo())]`](docs/attributes/with-singleton.md) | Registers a singleton via `GeneralUtility`, restores the previous singleton map |
-| [`#[WithBackendUser(admin: true)]`](docs/attributes/with-backend-user.md) | Provides a lightweight `$GLOBALS['BE_USER']` stub and the matching `Context` `backend.user` aspect |
-| [`#[WithFrontendUser(uid: 42)]`](docs/attributes/with-frontend-user.md) | Provides a lightweight `$GLOBALS['FE_USER']` stub and the matching `Context` `frontend.user` aspect |
-| [`#[FreezeTime('2026-07-14T12:00:00Z')]`](docs/attributes/freeze-time.md) | Pins the Context date aspect and `EXEC_TIME` globals |
-| [`#[InTimeZone('Europe/Berlin')]`](docs/attributes/in-time-zone.md) | Sets the default timezone (`date_default_timezone_set()`) |
-| [`#[InLocale(LC_ALL, 'de_DE.UTF-8')]`](docs/attributes/in-locale.md) | Sets the locale (`setlocale()`) for a given category |
-| [`#[WithStaticProperty(Foo::class, 'bar', 'value')]`](docs/attributes/with-static-property.md) | Generic escape hatch: overwrites any static property via reflection, full restore afterwards |
-| [`#[WithInstance(Foo::class, new FakeFoo())]`](docs/attributes/with-instance.md) | Queues a fake via `GeneralUtility::addInstance()` for the *next* `makeInstance()` call |
-
-> [!IMPORTANT]
-> 🧪 Unit tests only. Fails loudly if used on a `FunctionalTestCase` (the framework already owns `Environment` and the compiled container by the time it would apply). See each attribute's doc for requirements and further caveats.
+| [`#[WithTypo3ConfVars]`](docs/attributes/with-typo3-conf-vars.md) | Deep-merges configuration into `$GLOBALS['TYPO3_CONF_VARS']`, full restore afterwards |
+| [`#[WithTca]`](docs/attributes/with-tca.md) | Deep-merges configuration into `$GLOBALS['TCA'][$table]`, full restore afterwards |
+| [`#[WithGlobal]`](docs/attributes/with-global.md) | Sets an arbitrary `$GLOBALS` entry, full restore afterwards (incl. previously unset keys) |
+| [`#[WithEnvVar]`](docs/attributes/with-env-var.md) | Sets an environment variable (`putenv()`, `$_ENV`, `$_SERVER`), restores all three channels |
+| [`#[WithEnvironment]`](docs/attributes/with-environment.md) | Bootstraps `Environment::initialize()` in a temporary project directory incl. cleanup |
+| [`#[InApplicationContext]`](docs/attributes/in-application-context.md) | Switches the TYPO3 application context for one test |
+| [`#[WithSingleton]`](docs/attributes/with-singleton.md) | Registers a singleton via `GeneralUtility`, restores the previous singleton map |
+| [`#[WithBackendUser]`](docs/attributes/with-backend-user.md) | Provides a lightweight `$GLOBALS['BE_USER']` stub and the matching `Context` `backend.user` aspect |
+| [`#[WithFrontendUser]`](docs/attributes/with-frontend-user.md) | Provides a lightweight `$GLOBALS['FE_USER']` stub and the matching `Context` `frontend.user` aspect |
+| [`#[FreezeTime]`](docs/attributes/freeze-time.md) | Pins the Context date aspect and `EXEC_TIME` globals |
+| [`#[InTimeZone]`](docs/attributes/in-time-zone.md) | Sets the default timezone (`date_default_timezone_set()`) |
+| [`#[InLocale]`](docs/attributes/in-locale.md) | Sets the locale (`setlocale()`) for a given category |
+| [`#[WithStaticProperty]`](docs/attributes/with-static-property.md) | Generic escape hatch: overwrites any static property via reflection, full restore afterwards |
+| [`#[WithInstance]`](docs/attributes/with-instance.md) | Queues a fake via `GeneralUtility::addInstance()` for the *next* `makeInstance()` call |
 
 ### Kits
 

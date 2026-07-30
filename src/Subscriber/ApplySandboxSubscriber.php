@@ -15,25 +15,27 @@ namespace KonradMichalik\Ttt\Subscriber;
 
 use KonradMichalik\Ttt\Registry\SandboxRegistry;
 use PHPUnit\Event\Code\TestMethod;
-use PHPUnit\Event\Test\{PreparationStarted, PreparationStartedSubscriber};
+use PHPUnit\Event\Test\{Prepared, PreparedSubscriber};
 
 /**
  * ApplySandboxSubscriber.
  *
- * Applies all Terrarium attributes of the upcoming test right before PHPUnit
- * prepares it - i.e. before setUp() runs, so setUp() already observes the
- * sandboxed state.
+ * Applies all Terrarium attributes of the upcoming test once PHPUnit has
+ * finished preparing it - i.e. after setUp() (and any #[Before]/
+ * #[PreCondition] hooks) ran, and immediately before the test method body.
+ * setUp() therefore never observes Terrarium-managed state; use the
+ * imperative traits (e.g. ConfVarsSandbox) if setUp() needs to see it.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-3.0-or-later
  */
-final readonly class ApplySandboxSubscriber implements PreparationStartedSubscriber
+final readonly class ApplySandboxSubscriber implements PreparedSubscriber
 {
     public function __construct(
         private SandboxRegistry $registry,
     ) {}
 
-    public function notify(PreparationStarted $event): void
+    public function notify(Prepared $event): void
     {
         $test = $event->test();
 

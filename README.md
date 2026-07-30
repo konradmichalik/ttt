@@ -151,6 +151,22 @@ LogFixtures::write($path, ['line one', 'line two']);
 
 The restore logic is driven by PHPUnit's event system (`Test\Finished` fires for **every** test, regardless of outcome). Hand-written `tearDown()` cleanup can be skipped by hard errors and leak state into subsequent tests — Terrarium can't.
 
+### Lifecycle
+
+```
+setUp() (+ #[Before]/#[PreCondition] hooks)
+    ↓
+attributes applied            (Test\Prepared)
+    ↓
+test method body
+    ↓
+tearDown() (+ #[After] hooks) — attribute state still active
+    ↓
+attributes restored            (Test\Finished — fires even on failure/error)
+```
+
+`setUp()` never observes Terrarium-managed state; `tearDown()` still does, since restoration runs after it. If `setUp()` needs to see sandboxed state, apply it imperatively instead — see "Without the extension" below.
+
 ### Without the extension
 
 For imperative use (or mid-test changes) the same handlers are available as traits:

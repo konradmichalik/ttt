@@ -20,7 +20,8 @@ use Attribute;
  *
  * Provides a lightweight $GLOBALS['BE_USER'] stub (a
  * BackendUserAuthentication subclass with a skipped constructor and a
- * populated user record) and restores the previous global afterwards.
+ * populated user record), registers it as the Context's backend.user aspect,
+ * and restores both afterwards.
  *
  * The optional $groups parameter populates userGroupsUID, so
  * isMemberOfGroup() works for tests that check backend-user-group
@@ -42,5 +43,6 @@ final readonly class WithBackendUser implements TttAttribute
         public int $uid = 1,
         public string $username = 'ttt',
         public array $groups = [],
+        public int $workspace = 0,
     ) {}
 }

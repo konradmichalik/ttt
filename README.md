@@ -178,7 +178,19 @@ final class HandlerTest extends TestCase
 
 ## 🧩 Extending
 
-Custom attributes are two small classes: a DTO implementing `TttAttribute` and an `AttributeHandler` that applies the state and returns a restorer closure. Handlers must be stateless — all captured state belongs into the closure.
+Custom attributes are two small classes: a DTO implementing `TttAttribute` and an `AttributeHandler` (a public API with a backward-compatibility promise) that applies the state and returns a restorer closure. Handlers must be stateless — all captured state belongs into the closure.
+
+Register custom handlers via a comma-separated `handlers` parameter on the bootstrap extension — no need to replace `TttExtension`:
+
+```xml
+<extensions>
+    <bootstrap class="KonradMichalik\Ttt\TttExtension">
+        <parameter name="handlers" value="Vendor\Ext\Tests\Sandbox\MyHandler,Vendor\Ext\Tests\Sandbox\OtherHandler" />
+    </bootstrap>
+</extensions>
+```
+
+Custom handlers run after the built-in ones. A missing class or one that doesn't implement `AttributeHandler` fails fast with an actionable error naming the `handlers` parameter.
 
 ## 🧑‍💻 Contributing
 

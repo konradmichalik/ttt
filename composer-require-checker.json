@@ -7,6 +7,7 @@
 		"TYPO3\\CMS\\Core\\Authentication\\BackendUserAuthentication",
 		"TYPO3\\CMS\\Core\\Context\\Context",
 		"TYPO3\\CMS\\Core\\Context\\DateTimeAspect",
+		"TYPO3\\CMS\\Core\\Context\\UserAspect",
 		"TYPO3\\CMS\\Core\\Core\\ApplicationContext",
 		"TYPO3\\CMS\\Core\\Core\\Environment",
 		"TYPO3\\CMS\\Core\\Http\\NormalizedParams",

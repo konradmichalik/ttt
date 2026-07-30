@@ -5,6 +5,7 @@
 		"imagefill",
 		"imagepng",
 		"TYPO3\\CMS\\Core\\Authentication\\BackendUserAuthentication",
+		"TYPO3\\CMS\\Core\\Context\\AspectInterface",
 		"TYPO3\\CMS\\Core\\Context\\Context",
 		"TYPO3\\CMS\\Core\\Context\\DateTimeAspect",
 		"TYPO3\\CMS\\Core\\Context\\UserAspect",

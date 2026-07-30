@@ -1,11 +1,11 @@
-# [`#[InApplicationContext]`](../../src/Attribute/InApplicationContext.php) 🧪
+# [`#[InApplicationContext]`](../../src/Attribute/InApplicationContext.php)
 
 _Scope: Class & Method level_
 
 Switches the TYPO3 application context (e.g. `"Development"`, `"Production/Staging"`) for a single test by re-initializing the `Environment` with an identical state except for the context. Requires an already initialized `Environment`: combine with [`#[WithEnvironment]`](with-environment.md) if needed.
 
 > [!IMPORTANT]
-> 🧪 Unit tests only. Fails loudly if used on a `FunctionalTestCase` (the framework already owns `Environment` and the compiled container by the time it would apply).
+> Unit tests only. Fails loudly if used on a `FunctionalTestCase` (the framework already owns `Environment` and the compiled container by the time it would apply).
 
 Requires `typo3/cms-core`.
 

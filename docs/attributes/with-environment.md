@@ -1,11 +1,11 @@
-# [`#[WithEnvironment]`](../../src/Attribute/WithEnvironment.php) 🧪
+# [`#[WithEnvironment]`](../../src/Attribute/WithEnvironment.php)
 
 _Scope: Class & Method level_
 
 Bootstraps TYPO3's `Environment` for a single test (or test class) via `Environment::initialize()`. By default a temporary project directory (including `public/`, `var/` and `config/`) is created and deleted afterwards. If the `Environment` was initialized before, the previous state is restored; if it was **not** initialized before, it stays initialized with neutral values (un-initializing typed static properties is not possible in PHP).
 
 > [!IMPORTANT]
-> 🧪 Unit tests only. Fails loudly if used on a `FunctionalTestCase` (the framework already owns `Environment` and the compiled container by the time it would apply).
+> Unit tests only. Fails loudly if used on a `FunctionalTestCase` (the framework already owns `Environment` and the compiled container by the time it would apply).
 
 Requires `typo3/cms-core`.
 

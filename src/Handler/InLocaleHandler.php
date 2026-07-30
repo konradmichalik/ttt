@@ -50,7 +50,12 @@ final class InLocaleHandler implements AttributeHandler
         $previous = setlocale($attribute->category, '0');
 
         if (false === $previous) {
+            // Defensive: querying a valid LC_* category constant with '0'
+            // does not fail on any platform PHP itself supports; this
+            // guards a case that isn't realistically reachable in practice.
+            // @codeCoverageIgnoreStart
             throw new RuntimeException(sprintf('InLocale: unable to read the current locale for category %d.', $attribute->category), 1753900202);
+            // @codeCoverageIgnoreEnd
         }
 
         if (false === @setlocale($attribute->category, $attribute->locale)) {

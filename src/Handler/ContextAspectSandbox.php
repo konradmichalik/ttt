@@ -34,7 +34,9 @@ use function array_key_exists;
  */
 final class ContextAspectSandbox
 {
+    // @codeCoverageIgnoreStart
     private function __construct() {}
+    // @codeCoverageIgnoreEnd
 
     /**
      * @return Closure(): void Restorer reverting the aspect to its previous state

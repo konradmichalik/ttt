@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace KonradMichalik\Ttt\Tests\Handler;
 
 use KonradMichalik\Ttt\Attribute\{WithBackendUser, WithFrontendUser};
-use KonradMichalik\Ttt\Handler\{BackendUserHandler, FrontendUserHandler};
+use KonradMichalik\Ttt\Handler\{BackendUserHandler, ContextAspectSandbox, FrontendUserHandler};
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
@@ -31,6 +31,7 @@ use TYPO3\CMS\Frontend\Authentication\FrontendUserAuthentication;
  */
 #[CoversClass(FrontendUserHandler::class)]
 #[CoversClass(WithFrontendUser::class)]
+#[CoversClass(ContextAspectSandbox::class)]
 final class FrontendUserHandlerTest extends TestCase
 {
     protected function tearDown(): void

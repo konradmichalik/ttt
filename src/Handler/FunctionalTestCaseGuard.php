@@ -40,12 +40,20 @@ final class FunctionalTestCaseGuard
     // dependency of this package, so the class may not exist to reference.
     private const FUNCTIONAL_TEST_CASE = 'TYPO3\TestingFramework\Core\Functional\FunctionalTestCase';
 
+    // @codeCoverageIgnoreStart
     private function __construct() {}
+    // @codeCoverageIgnoreEnd
 
     public static function assertNotFunctionalTestCase(string $attributeName, string $reason, string $alternative): void
     {
         if (!class_exists(self::FUNCTIONAL_TEST_CASE)) {
+            // Defensive: the stub in tests/stubs makes this class exist for
+            // this repo's entire test run, so this branch is unreachable here.
+            // It is what keeps the guard inert for real consumers that never
+            // install typo3/testing-framework.
+            // @codeCoverageIgnoreStart
             return;
+            // @codeCoverageIgnoreEnd
         }
 
         $testClassName = self::currentTestClassName();
@@ -65,6 +73,12 @@ final class FunctionalTestCaseGuard
             }
         }
 
+        // Defensive: assertNotFunctionalTestCase() only reaches this call
+        // while ttt's own PHPUnit extension is applying attributes for a
+        // running test, which always has a TestCase instance somewhere in
+        // the call stack.
+        // @codeCoverageIgnoreStart
         return null;
+        // @codeCoverageIgnoreEnd
     }
 }

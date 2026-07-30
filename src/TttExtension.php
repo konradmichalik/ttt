@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Ttt;
 
-use KonradMichalik\Ttt\Handler\{ApplicationContextHandler, AttributeHandler, BackendUserHandler, ConfVarsHandler, EnvVarHandler, EnvironmentHandler, FreezeTimeHandler, FrontendUserHandler, GlobalHandler, SingletonHandler, TcaHandler};
+use KonradMichalik\Ttt\Handler\{ApplicationContextHandler, AttributeHandler, BackendUserHandler, ConfVarsHandler, EnvVarHandler, EnvironmentHandler, FreezeTimeHandler, FrontendUserHandler, GlobalHandler, InLocaleHandler, InTimeZoneHandler, SingletonHandler, StaticPropertyHandler, TcaHandler};
 use KonradMichalik\Ttt\Registry\SandboxRegistry;
 use KonradMichalik\Ttt\Subscriber\{ApplySandboxSubscriber, RestoreSandboxSubscriber};
 use PHPUnit\Runner\Extension\{Extension, Facade, ParameterCollection};
@@ -68,6 +68,9 @@ final class TttExtension implements Extension
             new FreezeTimeHandler(),
             new FrontendUserHandler(),
             new GlobalHandler(),
+            new InTimeZoneHandler(),
+            new InLocaleHandler(),
+            new StaticPropertyHandler(),
             new TcaHandler(),
             ...self::customHandlers($parameters),
         ]);

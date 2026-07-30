@@ -23,6 +23,11 @@ use KonradMichalik\Ttt\Attribute\TttAttribute;
  * closure that reverts the state exactly. Handlers must be stateless - all
  * captured state belongs into the returned closure.
  *
+ * Public API: covered by this package's backward-compatibility promise.
+ * Consuming extensions register their own implementations via the
+ * TttExtension "handlers" bootstrap parameter (see the README's "Extending"
+ * section).
+ *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-3.0-or-later
  */

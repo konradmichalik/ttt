@@ -83,7 +83,7 @@ That's it — all *ttt* attributes now work in every test. Attributes can be pla
 | `#[WithEnvironment(...)]` 🧪 | Bootstraps `Environment::initialize()` in a temporary project directory incl. cleanup | typo3/cms-core |
 | `#[InApplicationContext('Development')]` 🧪 | Switches the TYPO3 application context for one test | typo3/cms-core |
 | `#[WithSingleton(Foo::class, new FakeFoo())]` | Registers a singleton via `GeneralUtility`, restores the previous singleton map | typo3/cms-core |
-| `#[WithBackendUser(admin: true)]` | Provides a lightweight `$GLOBALS['BE_USER']` stub | typo3/cms-core |
+| `#[WithBackendUser(admin: true)]` | Provides a lightweight `$GLOBALS['BE_USER']` stub and the matching `Context` `backend.user` aspect | typo3/cms-core |
 | `#[FreezeTime('2026-07-14T12:00:00Z')]` | Pins the Context date aspect and `EXEC_TIME` globals | typo3/cms-core |
 
 🧪 unit tests only — fails loudly if used on a `FunctionalTestCase` (the framework already owns `Environment` and the compiled container by the time it would apply).

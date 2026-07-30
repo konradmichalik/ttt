@@ -16,7 +16,8 @@ namespace KonradMichalik\Ttt\Handler;
 use Closure;
 use DateTimeImmutable;
 use KonradMichalik\Ttt\Attribute\{FreezeTime, TttAttribute};
-use TYPO3\CMS\Core\Context\{Context, DateTimeAspect};
+use ReflectionProperty;
+use TYPO3\CMS\Core\Context\{AspectInterface, Context, DateTimeAspect};
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 use function array_key_exists;
@@ -26,9 +27,16 @@ use function assert;
  * FreezeTimeHandler.
  *
  * Applies FreezeTime: pins the Context date aspect and the legacy execution
- * time globals to a fixed timestamp and restores everything afterwards -
- * including the singleton map, in case the Context singleton did not exist
- * before.
+ * time globals to a fixed timestamp and restores everything afterwards.
+ * Only what FreezeTime itself touched is reverted - the Context singleton is
+ * dropped entirely if it did not exist before, otherwise only its date
+ * aspect is restored, so a singleton registered by other code during the
+ * test survives.
+ *
+ * Context::getAspect('date') lazily builds a DateTimeAspect from
+ * $GLOBALS['EXEC_TIME'] as a side effect, so the previous aspect is
+ * snapshotted via reflection on the protected Context::$aspects array
+ * instead of calling getAspect().
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-3.0-or-later
@@ -46,17 +54,24 @@ final class FreezeTimeHandler implements AttributeHandler
     {
         assert($attribute instanceof FreezeTime);
 
-        $singletonSnapshot = GeneralUtility::getSingletonInstances();
         $globalsSnapshot = [];
 
         foreach (self::TIME_GLOBALS as $name) {
             $globalsSnapshot[$name] = array_key_exists($name, $GLOBALS) ? $GLOBALS[$name] : null;
         }
 
+        $existedContext = array_key_exists(Context::class, GeneralUtility::getSingletonInstances());
+        $context = GeneralUtility::makeInstance(Context::class);
+
+        $aspectsProperty = new ReflectionProperty(Context::class, 'aspects');
+        /** @var array<string, AspectInterface> $aspectsSnapshot */
+        $aspectsSnapshot = $aspectsProperty->getValue($context);
+        $existedDateAspect = array_key_exists('date', $aspectsSnapshot);
+        $previousDateAspect = $aspectsSnapshot['date'] ?? null;
+
         $frozen = new DateTimeImmutable($attribute->dateTime);
         $timestamp = $frozen->getTimestamp();
 
-        $context = GeneralUtility::makeInstance(Context::class);
         $context->setAspect('date', new DateTimeAspect($frozen));
 
         $GLOBALS['EXEC_TIME'] = $timestamp;
@@ -64,7 +79,7 @@ final class FreezeTimeHandler implements AttributeHandler
         $GLOBALS['ACCESS_TIME'] = $timestamp - ($timestamp % 60);
         $GLOBALS['SIM_ACCESS_TIME'] = $timestamp - ($timestamp % 60);
 
-        return static function () use ($singletonSnapshot, $globalsSnapshot): void {
+        return static function () use ($globalsSnapshot, $context, $existedContext, $existedDateAspect, $previousDateAspect): void {
             foreach ($globalsSnapshot as $name => $value) {
                 if (null === $value) {
                     unset($GLOBALS[$name]);
@@ -73,7 +88,19 @@ final class FreezeTimeHandler implements AttributeHandler
                 }
             }
 
-            GeneralUtility::resetSingletonInstances($singletonSnapshot);
+            if (!$existedContext) {
+                $singletons = GeneralUtility::getSingletonInstances();
+                unset($singletons[Context::class]);
+                GeneralUtility::resetSingletonInstances($singletons);
+
+                return;
+            }
+
+            if ($existedDateAspect && null !== $previousDateAspect) {
+                $context->setAspect('date', $previousDateAspect);
+            } else {
+                $context->unsetAspect('date');
+            }
         };
     }
 }

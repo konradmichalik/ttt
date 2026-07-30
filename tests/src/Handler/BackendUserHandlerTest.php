@@ -17,8 +17,11 @@ use KonradMichalik\Ttt\Attribute\WithBackendUser;
 use KonradMichalik\Ttt\Handler\BackendUserHandler;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
+use ReflectionProperty;
 use stdClass;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Context\{Context, UserAspect};
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * BackendUserHandlerTest.
@@ -51,6 +54,68 @@ final class BackendUserHandlerTest extends TestCase
         $restore();
 
         self::assertArrayNotHasKey('BE_USER', $GLOBALS);
+    }
+
+    #[Test]
+    public function setsTheBackendUserContextAspect(): void
+    {
+        $restore = (new BackendUserHandler())->apply(new WithBackendUser(admin: true, uid: 42, groups: [3, 7]));
+
+        $context = GeneralUtility::makeInstance(Context::class);
+        self::assertTrue($context->getPropertyFromAspect('backend.user', 'isAdmin'));
+        self::assertSame(42, $context->getPropertyFromAspect('backend.user', 'id'));
+        self::assertSame([3, 7], $context->getPropertyFromAspect('backend.user', 'groupIds'));
+
+        $restore();
+    }
+
+    #[Test]
+    public function restoresAnAbsentBackendUserAspectToAbsent(): void
+    {
+        $context = GeneralUtility::makeInstance(Context::class);
+        $aspectsProperty = new ReflectionProperty(Context::class, 'aspects');
+        self::assertArrayNotHasKey('backend.user', $aspectsProperty->getValue($context));
+
+        $restore = (new BackendUserHandler())->apply(new WithBackendUser());
+        $restore();
+
+        self::assertArrayNotHasKey('backend.user', $aspectsProperty->getValue($context));
+    }
+
+    #[Test]
+    public function restoresAPreviouslySetBackendUserAspect(): void
+    {
+        $context = GeneralUtility::makeInstance(Context::class);
+        $previousAspect = new UserAspect();
+        $context->setAspect('backend.user', $previousAspect);
+
+        $restore = (new BackendUserHandler())->apply(new WithBackendUser(admin: true));
+        $restore();
+
+        $aspectsProperty = new ReflectionProperty(Context::class, 'aspects');
+        self::assertSame($previousAspect, $aspectsProperty->getValue($context)['backend.user']);
+
+        $context->unsetAspect('backend.user');
+    }
+
+    #[Test]
+    public function workspaceDefaultsToZero(): void
+    {
+        $restore = (new BackendUserHandler())->apply(new WithBackendUser());
+
+        self::assertSame(0, $GLOBALS['BE_USER']->workspace);
+
+        $restore();
+    }
+
+    #[Test]
+    public function workspaceIsConfigurable(): void
+    {
+        $restore = (new BackendUserHandler())->apply(new WithBackendUser(workspace: 5));
+
+        self::assertSame(5, $GLOBALS['BE_USER']->workspace);
+
+        $restore();
     }
 
     #[Test]

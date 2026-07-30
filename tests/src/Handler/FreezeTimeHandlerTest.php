@@ -13,11 +13,14 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Ttt\Tests\Handler;
 
+use DateTimeImmutable;
 use KonradMichalik\Ttt\Attribute\FreezeTime;
 use KonradMichalik\Ttt\Handler\FreezeTimeHandler;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
-use TYPO3\CMS\Core\Context\Context;
+use ReflectionProperty;
+use TYPO3\CMS\Core\Context\{Context, DateTimeAspect};
+use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -73,5 +76,56 @@ final class FreezeTimeHandlerTest extends TestCase
         foreach ($previous as $name => $value) {
             self::assertSame($value, $GLOBALS[$name]);
         }
+    }
+
+    #[Test]
+    public function contextIsFullyAbsentAfterwardsIfItWasAbsentBefore(): void
+    {
+        self::assertArrayNotHasKey(Context::class, GeneralUtility::getSingletonInstances());
+
+        $restore = (new FreezeTimeHandler())->apply(new FreezeTime('2026-07-14T12:00:30Z'));
+        $restore();
+
+        self::assertArrayNotHasKey(Context::class, GeneralUtility::getSingletonInstances());
+    }
+
+    #[Test]
+    public function singletonRegisteredDuringTheTestSurvivesRestore(): void
+    {
+        $restore = (new FreezeTimeHandler())->apply(new FreezeTime('2026-07-14T12:00:30Z'));
+
+        $singleton = new class implements SingletonInterface {};
+        GeneralUtility::setSingletonInstance($singleton::class, $singleton);
+
+        $restore();
+
+        self::assertSame($singleton, GeneralUtility::makeInstance($singleton::class));
+    }
+
+    #[Test]
+    public function restoresAPreviouslySetDateAspectWhenContextAlreadyExisted(): void
+    {
+        $context = GeneralUtility::makeInstance(Context::class);
+        $previousAspect = new DateTimeAspect(new DateTimeImmutable('2020-01-01T00:00:00Z'));
+        $context->setAspect('date', $previousAspect);
+
+        $restore = (new FreezeTimeHandler())->apply(new FreezeTime('2026-07-14T12:00:30Z'));
+        $restore();
+
+        $aspectsProperty = new ReflectionProperty(Context::class, 'aspects');
+        self::assertSame($previousAspect, $aspectsProperty->getValue($context)['date']);
+    }
+
+    #[Test]
+    public function unsetsDateAspectWhenContextExistedButHadNoDateAspectSet(): void
+    {
+        $context = GeneralUtility::makeInstance(Context::class);
+        $aspectsProperty = new ReflectionProperty(Context::class, 'aspects');
+        self::assertArrayNotHasKey('date', $aspectsProperty->getValue($context));
+
+        $restore = (new FreezeTimeHandler())->apply(new FreezeTime('2026-07-14T12:00:30Z'));
+        $restore();
+
+        self::assertArrayNotHasKey('date', $aspectsProperty->getValue($context));
     }
 }

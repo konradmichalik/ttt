@@ -84,6 +84,7 @@ That's it — all *ttt* attributes now work in every test. Attributes can be pla
 
 - [Available attributes](#available-attributes)
 - [Why an extension instead of tearDown()?](#why-an-extension-instead-of-teardown)
+- [Lifecycle](#lifecycle)
 - [Without the extension](#without-the-extension)
 
 **Additional kits**
@@ -99,11 +100,13 @@ That's it — all *ttt* attributes now work in every test. Attributes can be pla
 |---|---|---|
 | `#[WithTypo3ConfVars([...])]` | Deep-merges configuration into `$GLOBALS['TYPO3_CONF_VARS']`, full restore afterwards | — |
 | `#[WithEnvVar('NAME', 'value')]` | Sets an environment variable (`putenv()`, `$_ENV`, `$_SERVER`), restores all three channels | — |
-| `#[WithEnvironment(...)]` | Bootstraps `Environment::initialize()` in a temporary project directory incl. cleanup | typo3/cms-core |
-| `#[InApplicationContext('Development')]` | Switches the TYPO3 application context for one test | typo3/cms-core |
+| `#[WithEnvironment(...)]` 🧪 | Bootstraps `Environment::initialize()` in a temporary project directory incl. cleanup | typo3/cms-core |
+| `#[InApplicationContext('Development')]` 🧪 | Switches the TYPO3 application context for one test | typo3/cms-core |
 | `#[WithSingleton(Foo::class, new FakeFoo())]` | Registers a singleton via `GeneralUtility`, restores the previous singleton map | typo3/cms-core |
-| `#[WithBackendUser(admin: true)]` | Provides a lightweight `$GLOBALS['BE_USER']` stub | typo3/cms-core |
+| `#[WithBackendUser(admin: true)]` | Provides a lightweight `$GLOBALS['BE_USER']` stub and the matching `Context` `backend.user` aspect | typo3/cms-core |
 | `#[FreezeTime('2026-07-14T12:00:00Z')]` | Pins the Context date aspect and `EXEC_TIME` globals | typo3/cms-core |
+
+🧪 unit tests only — fails loudly if used on a `FunctionalTestCase` (the framework already owns `Environment` and the compiled container by the time it would apply).
 
 `#[FreezeTime]`'s scope is deliberately narrow: it pins the `Context` date aspect and the legacy `EXEC_TIME`/`SIM_EXEC_TIME`/`ACCESS_TIME`/`SIM_ACCESS_TIME` globals. It does **not** affect `new DateTimeImmutable()`, `time()` or `date()` calls in the code under test — those read the system clock directly, not TYPO3's time abstractions.
 
@@ -172,6 +175,26 @@ LogFixtures::write($path, ['line one', 'line two']);
 
 The restore logic is driven by PHPUnit's event system (`Test\Finished` fires for **every** test, regardless of outcome). Hand-written `tearDown()` cleanup can be skipped by hard errors and leak state into subsequent tests — Terrarium can't.
 
+### Lifecycle
+
+```
+setUp() (+ #[Before]/#[PreCondition] hooks)
+    ↓
+attributes applied            (PHPUnit\Event\Test\Prepared)
+    ↓
+test method body
+    ↓
+tearDown() (+ #[After] hooks) — attribute state still active
+    ↓
+attributes restored            (PHPUnit\Event\Test\Finished — fires even on failure/error)
+```
+
+`setUp()` never observes Terrarium-managed state; `tearDown()` still does, since restoration runs after it — but by then the test's result is already determined, so nothing an attribute does in `tearDown()` can affect a passed/failed outcome. If `setUp()` needs to see sandboxed state, apply it imperatively instead — see "Without the extension" below.
+
+#### Parallel execution
+
+`#[WithEnvVar]` (`putenv()`/`$_ENV`/`$_SERVER`) and any attribute touching process-global PHP state (e.g. a future timezone/locale attribute via `date_default_timezone_set()`/`setlocale()`) mutate state shared by the whole PHP process, not per-test state. Safe under `paratest` (one process per worker), unsafe under any runner that shares a process across tests running concurrently. This is a known constraint of process-global PHP APIs, not something Terrarium can work around.
+
 ### Without the extension
 
 For imperative use (or mid-test changes) the same handlers are available as traits:
@@ -199,7 +222,19 @@ final class HandlerTest extends TestCase
 
 ## 🧩 Extending
 
-Custom attributes are two small classes: a DTO implementing `TttAttribute` and an `AttributeHandler` that applies the state and returns a restorer closure. Handlers must be stateless — all captured state belongs into the closure.
+Custom attributes are two small classes: a DTO implementing `TttAttribute` and an `AttributeHandler` (a public API with a backward-compatibility promise) that applies the state and returns a restorer closure. Handlers must be stateless — all captured state belongs into the closure.
+
+Register custom handlers via a comma-separated `handlers` parameter on the bootstrap extension — no need to replace `TttExtension`:
+
+```xml
+<extensions>
+    <bootstrap class="KonradMichalik\Ttt\TttExtension">
+        <parameter name="handlers" value="Vendor\Ext\Tests\Sandbox\MyHandler,Vendor\Ext\Tests\Sandbox\OtherHandler" />
+    </bootstrap>
+</extensions>
+```
+
+Custom handlers run after the built-in ones. A missing class or one that doesn't implement `AttributeHandler` fails fast with an actionable error naming the `handlers` parameter.
 
 See [`docs/non-goals.md`](docs/non-goals.md) for what's deliberately out of scope, and why.
 

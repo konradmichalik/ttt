@@ -18,7 +18,7 @@ use KonradMichalik\Ttt\Handler\ConfVarsHandler;
 use KonradMichalik\Ttt\Registry\SandboxRegistry;
 use KonradMichalik\Ttt\Subscriber\ApplySandboxSubscriber;
 use PHPUnit\Event\Code\Phpt;
-use PHPUnit\Event\Test\PreparationStarted;
+use PHPUnit\Event\Test\Prepared;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 
@@ -42,7 +42,7 @@ final class ApplySandboxSubscriberTest extends TestCase
         $registry = new SandboxRegistry([new ConfVarsHandler()]);
         $subscriber = new ApplySandboxSubscriber($registry);
 
-        $subscriber->notify(new PreparationStarted(
+        $subscriber->notify(new Prepared(
             TestEventFactory::telemetryInfo(),
             TestEventFactory::testMethod(SubscriberFixture::class, 'annotatedMethod'),
         ));
@@ -58,7 +58,7 @@ final class ApplySandboxSubscriberTest extends TestCase
         $registry = new SandboxRegistry([new ConfVarsHandler()]);
         $subscriber = new ApplySandboxSubscriber($registry);
 
-        $subscriber->notify(new PreparationStarted(
+        $subscriber->notify(new Prepared(
             TestEventFactory::telemetryInfo(),
             new Phpt('fixture.phpt'),
         ));

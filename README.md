@@ -99,6 +99,7 @@ That's it — all *ttt* attributes now work in every test. Attributes can be pla
 | Attribute | Purpose | Requires |
 |---|---|---|
 | `#[WithTypo3ConfVars([...])]` | Deep-merges configuration into `$GLOBALS['TYPO3_CONF_VARS']`, full restore afterwards | — |
+| `#[WithTca('tt_content', [...])]` | Deep-merges configuration into `$GLOBALS['TCA'][$table]`, full restore afterwards | — |
 | `#[WithEnvVar('NAME', 'value')]` | Sets an environment variable (`putenv()`, `$_ENV`, `$_SERVER`), restores all three channels | — |
 | `#[WithEnvironment(...)]` 🧪 | Bootstraps `Environment::initialize()` in a temporary project directory incl. cleanup | typo3/cms-core |
 | `#[InApplicationContext('Development')]` 🧪 | Switches the TYPO3 application context for one test | typo3/cms-core |

@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace KonradMichalik\Ttt\Handler;
 
 use Closure;
-use KonradMichalik\Ttt\Attribute\{TttAttribute, Typo3ConfVarsSentinel, WithTypo3ConfVars};
+use KonradMichalik\Ttt\Attribute\{TttAttribute, WithTypo3ConfVars};
 
 use function array_key_exists;
 use function assert;
@@ -45,7 +45,7 @@ final class ConfVarsHandler implements AttributeHandler
         /** @var array<string, mixed> $snapshot */
         $snapshot = $existed ? $GLOBALS['TYPO3_CONF_VARS'] : [];
 
-        $GLOBALS['TYPO3_CONF_VARS'] = self::mergeRecursiveWithOverride($snapshot, $attribute->configuration);
+        $GLOBALS['TYPO3_CONF_VARS'] = SentinelAwareArrayMerge::merge($snapshot, $attribute->configuration);
 
         return static function () use ($existed, $snapshot): void {
             if ($existed) {
@@ -54,30 +54,5 @@ final class ConfVarsHandler implements AttributeHandler
                 unset($GLOBALS['TYPO3_CONF_VARS']);
             }
         };
-    }
-
-    /**
-     * @param array<array-key, mixed> $base
-     * @param array<array-key, mixed> $override
-     *
-     * @return array<array-key, mixed>
-     */
-    private static function mergeRecursiveWithOverride(array $base, array $override): array
-    {
-        foreach ($override as $key => $value) {
-            if (Typo3ConfVarsSentinel::Unset === $value) {
-                unset($base[$key]);
-                continue;
-            }
-
-            if (is_array($value) && isset($base[$key]) && is_array($base[$key])) {
-                $base[$key] = self::mergeRecursiveWithOverride($base[$key], $value);
-                continue;
-            }
-
-            $base[$key] = $value;
-        }
-
-        return $base;
     }
 }

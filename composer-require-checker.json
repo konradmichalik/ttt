@@ -5,6 +5,7 @@
 		"imagefill",
 		"imagepng",
 		"TYPO3\\CMS\\Core\\Authentication\\BackendUserAuthentication",
+		"TYPO3\\CMS\\Core\\Context\\AspectInterface",
 		"TYPO3\\CMS\\Core\\Context\\Context",
 		"TYPO3\\CMS\\Core\\Context\\DateTimeAspect",
 		"TYPO3\\CMS\\Core\\Context\\UserAspect",
@@ -16,6 +17,7 @@
 		"TYPO3\\CMS\\Core\\Site\\Entity\\Site",
 		"TYPO3\\CMS\\Core\\Site\\Entity\\SiteSettings",
 		"TYPO3\\CMS\\Core\\SingletonInterface",
-		"TYPO3\\CMS\\Core\\Utility\\GeneralUtility"
+		"TYPO3\\CMS\\Core\\Utility\\GeneralUtility",
+		"TYPO3\\CMS\\Frontend\\Authentication\\FrontendUserAuthentication"
 	]
 }

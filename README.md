@@ -106,6 +106,10 @@ That's it — all *ttt* attributes now work in every test. Attributes can be pla
 | `#[WithSingleton(Foo::class, new FakeFoo())]` | Registers a singleton via `GeneralUtility`, restores the previous singleton map | typo3/cms-core |
 | `#[WithBackendUser(admin: true)]` | Provides a lightweight `$GLOBALS['BE_USER']` stub and the matching `Context` `backend.user` aspect | typo3/cms-core |
 | `#[FreezeTime('2026-07-14T12:00:00Z')]` | Pins the Context date aspect and `EXEC_TIME` globals | typo3/cms-core |
+| `#[InTimeZone('Europe/Berlin')]` | Sets the default timezone (`date_default_timezone_set()`) | — |
+| `#[InLocale(LC_ALL, 'de_DE.UTF-8')]` | Sets the locale (`setlocale()`) for a given category | — |
+
+`#[InTimeZone]` and `#[InLocale]` mutate process-global PHP state (`date_default_timezone_set()` / `setlocale()`): safe under `paratest` (one process per worker), unsafe under any runner sharing a process across tests running concurrently.
 
 🧪 unit tests only — fails loudly if used on a `FunctionalTestCase` (the framework already owns `Environment` and the compiled container by the time it would apply).
 

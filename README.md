@@ -108,8 +108,11 @@ That's it — all *ttt* attributes now work in every test. Attributes can be pla
 | `#[FreezeTime('2026-07-14T12:00:00Z')]` | Pins the Context date aspect and `EXEC_TIME` globals | typo3/cms-core |
 | `#[InTimeZone('Europe/Berlin')]` | Sets the default timezone (`date_default_timezone_set()`) | — |
 | `#[InLocale(LC_ALL, 'de_DE.UTF-8')]` | Sets the locale (`setlocale()`) for a given category | — |
+| `#[WithStaticProperty(Foo::class, 'bar', 'value')]` | Generic escape hatch: overwrites any static property via reflection, full restore afterwards | — |
 
 `#[InTimeZone]` and `#[InLocale]` mutate process-global PHP state (`date_default_timezone_set()` / `setlocale()`): safe under `paratest` (one process per worker), unsafe under any runner sharing a process across tests running concurrently.
+
+`#[WithStaticProperty]` is a fallback for the long tail of static state that has no dedicated attribute yet — prefer a dedicated attribute where one exists. A readonly static property or one that is not yet initialized fails loudly instead of being silently (mis)applied.
 
 🧪 unit tests only — fails loudly if used on a `FunctionalTestCase` (the framework already owns `Environment` and the compiled container by the time it would apply).
 

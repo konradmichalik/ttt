@@ -39,4 +39,11 @@ final class RestorationBetweenTestsTest extends TestCase
     {
         self::assertFalse(getenv('TTT_INTEGRATION_VAR'));
     }
+
+    #[Test]
+    public function tcaTablesAreNotLeakedByAnnotatedTests(): void
+    {
+        self::assertArrayNotHasKey('tt_content', $GLOBALS['TCA'] ?? []);
+        self::assertArrayNotHasKey('pages', $GLOBALS['TCA'] ?? []);
+    }
 }

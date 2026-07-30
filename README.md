@@ -85,6 +85,9 @@ That's it — all *ttt* attributes now work in every test. Attributes can be pla
 | `#[WithSingleton(Foo::class, new FakeFoo())]` | Registers a singleton via `GeneralUtility`, restores the previous singleton map | typo3/cms-core |
 | `#[WithBackendUser(admin: true)]` | Provides a lightweight `$GLOBALS['BE_USER']` stub | typo3/cms-core |
 | `#[FreezeTime('2026-07-14T12:00:00Z')]` | Pins the Context date aspect and `EXEC_TIME` globals | typo3/cms-core |
+| `#[WithInstance(Foo::class, new FakeFoo())]` | Queues a fake via `GeneralUtility::addInstance()` for the *next* `makeInstance()` call | typo3/cms-core |
+
+`#[WithInstance]` is restore-only: an instance still queued at test end is purged so it can't leak into the next test, but whether it was actually consumed by a `makeInstance()` call is not asserted.
 
 ### Request kit
 

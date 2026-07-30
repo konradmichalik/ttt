@@ -30,7 +30,9 @@ use function is_array;
  */
 final class SentinelAwareArrayMerge
 {
+    // @codeCoverageIgnoreStart
     private function __construct() {}
+    // @codeCoverageIgnoreEnd
 
     /**
      * @param array<array-key, mixed> $base

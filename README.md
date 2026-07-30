@@ -9,7 +9,7 @@
 
 </div>
 
-*ttt* (**TYPO3 Testing Terrarium**) is a PHPUnit testing toolbox for TYPO3 extension development. It puts `TYPO3_CONF_VARS`, environment variables, application context & more in place declaratively via PHP attributes — guaranteed to be cleaned up afterwards, whether the test passes, fails or errors.
+*ttt* (**TYPO3 Testing Terrarium**) is a PHPUnit testing toolbox for TYPO3 extension development. At its core is declarative test sandboxing: `TYPO3_CONF_VARS`, environment variables, application context & more, put in place via PHP attributes and guaranteed to be cleaned up afterwards, whether the test passes, fails or errors. A Request kit, an Assertion kit, a Contract kit and a Fixture kit round out the rest of everyday TYPO3 test writing.
 
 **Before:**
 
@@ -45,6 +45,20 @@ final class HandlerTest extends TestCase
 }
 ```
 
+#### Why not `#[BackupGlobals]`?
+
+PHPUnit's built-in `#[BackupGlobals(true)]` already snapshots and restores `$GLOBALS`. Terrarium is a different tool for a different granularity:
+
+| | `#[BackupGlobals(true)]` | Terrarium |
+|---|---|---|
+| Granularity | The entire `$GLOBALS` superglobal | Per-attribute: exactly the keys you declare |
+| Merge semantics | Full snapshot/restore, no merging | Deep merge on top of the existing value |
+| `putenv()` / `$_ENV` / `$_SERVER` | Not covered | `#[WithEnvVar]` restores all three channels |
+| Non-serializable values | `$GLOBALS` must be serializable for the snapshot to work | Any object reference works, nothing is serialized |
+| Cost | Serializes/deserializes all of `$GLOBALS` per test | Only touches the keys the attribute declares |
+
+Use `#[BackupGlobals(true)]` when you genuinely don't know what a test might touch. Use Terrarium's attributes when you know exactly which keys matter — which is the common case for TYPO3 extension tests.
+
 ## 🔥 Installation
 
 [![Packagist](https://img.shields.io/packagist/v/konradmichalik/ttt?label=version&logo=packagist)](https://packagist.org/packages/konradmichalik/ttt)
@@ -66,14 +80,19 @@ Register the extension once in your `phpunit.xml`:
 
 That's it — all *ttt* attributes now work in every test. Attributes can be placed on classes and methods (class level is applied first, method level merges on top) and are repeatable.
 
+**Core: declarative sandbox**
+
 - [Available attributes](#available-attributes)
+- [Why an extension instead of tearDown()?](#why-an-extension-instead-of-teardown)
+- [Lifecycle](#lifecycle)
+- [Without the extension](#without-the-extension)
+
+**Additional kits**
+
 - [Request kit](#request-kit)
 - [Assertion kit](#assertion-kit)
 - [Contract kit](#contract-kit)
 - [Fixture kit](#fixture-kit)
-- [Why an extension instead of tearDown()?](#why-an-extension-instead-of-teardown)
-- [Lifecycle](#lifecycle)
-- [Without the extension](#without-the-extension)
 
 ### Available attributes
 
@@ -88,6 +107,8 @@ That's it — all *ttt* attributes now work in every test. Attributes can be pla
 | `#[FreezeTime('2026-07-14T12:00:00Z')]` | Pins the Context date aspect and `EXEC_TIME` globals | typo3/cms-core |
 
 🧪 unit tests only — fails loudly if used on a `FunctionalTestCase` (the framework already owns `Environment` and the compiled container by the time it would apply).
+
+`#[FreezeTime]`'s scope is deliberately narrow: it pins the `Context` date aspect and the legacy `EXEC_TIME`/`SIM_EXEC_TIME`/`ACCESS_TIME`/`SIM_ACCESS_TIME` globals. It does **not** affect `new DateTimeImmutable()`, `time()` or `date()` calls in the code under test — those read the system clock directly, not TYPO3's time abstractions.
 
 ### Request kit
 
@@ -214,6 +235,8 @@ Register custom handlers via a comma-separated `handlers` parameter on the boots
 ```
 
 Custom handlers run after the built-in ones. A missing class or one that doesn't implement `AttributeHandler` fails fast with an actionable error naming the `handlers` parameter.
+
+See [`docs/non-goals.md`](docs/non-goals.md) for what's deliberately out of scope, and why.
 
 ## 🧑‍💻 Contributing
 

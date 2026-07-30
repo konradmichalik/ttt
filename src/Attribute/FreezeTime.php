@@ -23,6 +23,10 @@ use Attribute;
  * point in time for deterministic tests. Accepts any string understood by
  * DateTimeImmutable::__construct().
  *
+ * Scope is deliberately narrow: it does not affect `new DateTimeImmutable()`,
+ * `time()` or `date()` calls in the code under test, since those read the
+ * system clock directly rather than TYPO3's time abstractions.
+ *
  * Requires typo3/cms-core.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>

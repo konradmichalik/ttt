@@ -105,6 +105,7 @@ That's it — all *ttt* attributes now work in every test. Attributes can be pla
 | `#[InApplicationContext('Development')]` 🧪 | Switches the TYPO3 application context for one test | typo3/cms-core |
 | `#[WithSingleton(Foo::class, new FakeFoo())]` | Registers a singleton via `GeneralUtility`, restores the previous singleton map | typo3/cms-core |
 | `#[WithBackendUser(admin: true)]` | Provides a lightweight `$GLOBALS['BE_USER']` stub and the matching `Context` `backend.user` aspect | typo3/cms-core |
+| `#[WithFrontendUser(uid: 42)]` | Provides a lightweight `$GLOBALS['FE_USER']` stub and the matching `Context` `frontend.user` aspect | typo3/cms-frontend |
 | `#[FreezeTime('2026-07-14T12:00:00Z')]` | Pins the Context date aspect and `EXEC_TIME` globals | typo3/cms-core |
 | `#[InTimeZone('Europe/Berlin')]` | Sets the default timezone (`date_default_timezone_set()`) | — |
 | `#[InLocale(LC_ALL, 'de_DE.UTF-8')]` | Sets the locale (`setlocale()`) for a given category | — |

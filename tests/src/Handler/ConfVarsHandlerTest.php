@@ -15,7 +15,7 @@ namespace KonradMichalik\Ttt\Tests\Handler;
 
 use Generator;
 use KonradMichalik\Ttt\Attribute\{Typo3ConfVarsSentinel, WithTypo3ConfVars};
-use KonradMichalik\Ttt\Handler\ConfVarsHandler;
+use KonradMichalik\Ttt\Handler\{ConfVarsHandler, SentinelAwareArrayMerge};
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
 
@@ -26,6 +26,7 @@ use PHPUnit\Framework\TestCase;
  * @license GPL-3.0-or-later
  */
 #[CoversClass(ConfVarsHandler::class)]
+#[CoversClass(SentinelAwareArrayMerge::class)]
 final class ConfVarsHandlerTest extends TestCase
 {
     private ConfVarsHandler $subject;

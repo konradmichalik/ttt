@@ -25,13 +25,17 @@ use function assert;
  * CacheHandler.
  *
  * Applies WithCache: snapshots the CacheManager singleton's current cache
- * configurations and any already-instantiated cache frontends, registers
- * the given configuration via CacheManager::setCacheConfigurations() and
- * restores the exact previous state afterwards.
+ * configurations, already-instantiated cache frontends and cache groups,
+ * registers the given configuration via CacheManager::setCacheConfigurations()
+ * and restores the exact previous state afterwards.
  *
  * setCacheConfigurations() replaces the entire configuration array on every
  * call, so the previous configurations are merged back in with the new
- * identifier taking precedence rather than passed as-is.
+ * identifier taking precedence rather than passed as-is. Any frontend
+ * already instantiated for that identifier is dropped from the live cache
+ * map so getCache() rebuilds it against the new configuration instead of
+ * returning the stale instance; createCache() appends to cacheGroups as a
+ * side effect of that rebuild, so cacheGroups is restored alongside it.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-3.0-or-later
@@ -51,9 +55,11 @@ final class CacheHandler implements AttributeHandler
 
         $configurationsProperty = new ReflectionProperty(CacheManager::class, 'cacheConfigurations');
         $cachesProperty = new ReflectionProperty(CacheManager::class, 'caches');
+        $cacheGroupsProperty = new ReflectionProperty(CacheManager::class, 'cacheGroups');
 
         $configurationsBefore = $configurationsProperty->getValue($cacheManager);
         $cachesBefore = $cachesProperty->getValue($cacheManager);
+        $cacheGroupsBefore = $cacheGroupsProperty->getValue($cacheManager);
 
         $configurations = $configurationsBefore;
         $configurations[$attribute->identifier] = [
@@ -62,9 +68,14 @@ final class CacheHandler implements AttributeHandler
         ];
         $cacheManager->setCacheConfigurations($configurations);
 
-        return static function () use ($cacheManager, $configurationsProperty, $cachesProperty, $configurationsBefore, $cachesBefore): void {
+        $caches = $cachesBefore;
+        unset($caches[$attribute->identifier]);
+        $cachesProperty->setValue($cacheManager, $caches);
+
+        return static function () use ($cacheManager, $configurationsProperty, $cachesProperty, $cacheGroupsProperty, $configurationsBefore, $cachesBefore, $cacheGroupsBefore): void {
             $configurationsProperty->setValue($cacheManager, $configurationsBefore);
             $cachesProperty->setValue($cacheManager, $cachesBefore);
+            $cacheGroupsProperty->setValue($cacheManager, $cacheGroupsBefore);
         };
     }
 }

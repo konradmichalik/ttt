@@ -98,6 +98,37 @@ final class CacheHandlerTest extends TestCase
     }
 
     #[Test]
+    public function overridesAnAlreadyInstantiatedCacheForTheSameIdentifier(): void
+    {
+        $this->cacheManager->setCacheConfigurations([
+            'runtime' => [
+                'frontend' => VariableFrontend::class,
+                'backend' => NullBackend::class,
+            ],
+        ]);
+        $this->cacheManager->getCache('runtime');
+
+        $restore = (new CacheHandler())->apply(new WithCache());
+
+        self::assertInstanceOf(TransientMemoryBackend::class, self::backendOf($this->cacheManager->getCache('runtime')));
+
+        $restore();
+    }
+
+    #[Test]
+    public function doesNotLeakCacheGroupEntriesAfterRestore(): void
+    {
+        $restore = (new CacheHandler())->apply(new WithCache());
+
+        $this->cacheManager->getCache('runtime');
+
+        $restore();
+
+        $cacheGroupsProperty = new ReflectionProperty(CacheManager::class, 'cacheGroups');
+        self::assertSame([], $cacheGroupsProperty->getValue($this->cacheManager));
+    }
+
+    #[Test]
     public function preservesUnrelatedCacheConfigurationsWhileApplied(): void
     {
         $this->cacheManager->setCacheConfigurations([

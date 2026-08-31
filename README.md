@@ -1,5 +1,7 @@
 <div align="center">
 
+![icon](icon.png)
+
 # *ttt*
 
 [![Coverage](https://img.shields.io/coverallsCoverage/github/konradmichalik/ttt?logo=coveralls)](https://coveralls.io/github/konradmichalik/ttt)

@@ -81,6 +81,7 @@ That's it: all *ttt* attributes now work in every test. Attributes can be placed
 | [`#[WithEnvironment]`](docs/attributes/with-environment.md) | Bootstraps `Environment::initialize()` in a temporary project directory incl. cleanup |
 | [`#[InApplicationContext]`](docs/attributes/in-application-context.md) | Switches the TYPO3 application context for one test |
 | [`#[WithSingleton]`](docs/attributes/with-singleton.md) | Registers a singleton via `GeneralUtility`, restores the previous singleton map |
+| [`#[WithCache]`](docs/attributes/with-cache.md) | Registers a `CacheManager` cache configuration (defaults to `"runtime"`), restores the previous configuration |
 | [`#[WithBackendUser]`](docs/attributes/with-backend-user.md) | Provides a lightweight `$GLOBALS['BE_USER']` stub and the matching `Context` `backend.user` aspect |
 | [`#[WithFrontendUser]`](docs/attributes/with-frontend-user.md) | Provides a lightweight `$GLOBALS['FE_USER']` stub and the matching `Context` `frontend.user` aspect |
 | [`#[FreezeTime]`](docs/attributes/freeze-time.md) | Pins the Context date aspect and `EXEC_TIME` globals |

@@ -77,9 +77,7 @@ final class EnvironmentHandler implements AttributeHandler
             $createdPath = $projectPath;
         }
 
-        if (null === $projectPath) {
-            $projectPath = sys_get_temp_dir();
-        }
+        $projectPath ??= sys_get_temp_dir();
 
         if (null !== $createdPath && (is_dir($createdPath) || is_link($createdPath))) {
             // Fail closed instead of adopting a path we did not create (symlink/pre-creation race).

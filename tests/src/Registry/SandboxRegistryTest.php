@@ -83,6 +83,23 @@ final class SandboxRegistryTest extends TestCase
     }
 
     #[Test]
+    public function appliesDataSetAttributesAfterClassAndMethodLevelAttributes(): void
+    {
+        $registry = new SandboxRegistry([new ConfVarsHandler()]);
+
+        $registry->applyFor(AnnotatedFixture::class, 'annotatedMethod', [
+            new WithTypo3ConfVars(['SYS' => ['sitename' => 'data set']]),
+        ]);
+
+        self::assertSame('data set', $GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename']);
+        self::assertTrue($GLOBALS['TYPO3_CONF_VARS']['SYS']['fromClass']);
+
+        $registry->restoreAll();
+
+        self::assertArrayNotHasKey('TYPO3_CONF_VARS', $GLOBALS);
+    }
+
+    #[Test]
     public function hasAttributesForReportsClassAndMethodLevelAttributesWithoutApplyingThem(): void
     {
         $registry = new SandboxRegistry([new ConfVarsHandler()]);

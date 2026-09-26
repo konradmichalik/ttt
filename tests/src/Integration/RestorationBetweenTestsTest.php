@@ -19,9 +19,10 @@ use PHPUnit\Framework\TestCase;
 /**
  * RestorationBetweenTestsTest.
  *
- * Companion to WithTypo3ConfVarsAttributeTest: this class carries NO
- * Terrarium attributes, so any leaked TYPO3_CONF_VARS or environment
- * variable from the annotated tests would fail here.
+ * Companion to WithTypo3ConfVarsAttributeTest and DataSetAttributesTest:
+ * this class carries NO Terrarium attributes, so any leaked
+ * TYPO3_CONF_VARS or environment variable from the annotated tests would
+ * fail here.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-3.0-or-later
@@ -38,6 +39,13 @@ final class RestorationBetweenTestsTest extends TestCase
     public function envVarIsNotLeakedByAnnotatedTests(): void
     {
         self::assertFalse(getenv('TTT_INTEGRATION_VAR'));
+    }
+
+    #[Test]
+    public function dataSetEnvVarsAreNotLeakedByVariants(): void
+    {
+        self::assertFalse(getenv('TTT_VARIANT'));
+        self::assertFalse(getenv('TTT_VARIANT_BASE'));
     }
 
     #[Test]

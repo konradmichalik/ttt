@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace KonradMichalik\Ttt\Tests\Fixtures\ProcessIsolation;
 
 use KonradMichalik\Ttt\Attribute\WithEnvVar;
-use PHPUnit\Framework\Attributes\{RunInSeparateProcess, Test};
+use PHPUnit\Framework\Attributes\{RunInSeparateProcess, Test, TestWith};
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -32,6 +32,14 @@ final class ProcessIsolationFixtureTest extends TestCase
     #[RunInSeparateProcess]
     #[WithEnvVar('TTT_ISOLATION_VAR', 'on')]
     public function attributedTestInSeparateProcess(): void
+    {
+        self::expectNotToPerformAssertions();
+    }
+
+    #[Test]
+    #[RunInSeparateProcess]
+    #[TestWith([new WithEnvVar('TTT_ISOLATION_VAR', 'on')])]
+    public function dataSetAttributeInSeparateProcess(WithEnvVar $variant): void
     {
         self::expectNotToPerformAssertions();
     }

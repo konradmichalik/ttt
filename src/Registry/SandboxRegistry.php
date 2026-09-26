@@ -28,7 +28,7 @@ use function array_pop;
  * SandboxRegistry.
  *
  * Collects Terrarium attributes for a given test (class-level first, then
- * method-level), applies them through their handlers and keeps the restorer
+ * method-level, then those of the current data set), applies them through their handlers and keeps the restorer
  * stack. Restoration runs in LIFO order and is guaranteed to execute every
  * restorer, even if one of them throws.
  *
@@ -58,11 +58,12 @@ final class SandboxRegistry
     ) {}
 
     /**
-     * @param class-string $className
+     * @param class-string       $className
+     * @param list<TttAttribute> $dataSetAttributes applied last, so they take precedence
      */
-    public function applyFor(string $className, string $methodName): void
+    public function applyFor(string $className, string $methodName, array $dataSetAttributes = []): void
     {
-        foreach ($this->resolveAttributes($className, $methodName) as $attribute) {
+        foreach ([...$this->resolveAttributes($className, $methodName), ...$dataSetAttributes] as $attribute) {
             foreach ($this->handlers as $handler) {
                 if ($handler->supports($attribute)) {
                     $this->restorers[] = $handler->apply($attribute);

@@ -3,7 +3,7 @@
 ```
 setUp() (+ #[Before]/#[PreCondition] hooks)
     ↓
-attributes applied            (PHPUnit\Event\Test\Prepared)
+attributes applied            (PHPUnit\Event\Test\Prepared: class, method, then data set)
     ↓
 test method body
     ↓

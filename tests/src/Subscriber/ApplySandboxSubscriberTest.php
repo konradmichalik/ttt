@@ -19,6 +19,7 @@ use KonradMichalik\Ttt\Registry\SandboxRegistry;
 use KonradMichalik\Ttt\Subscriber\ApplySandboxSubscriber;
 use PHPUnit\Event\Code\Phpt;
 use PHPUnit\Event\Test\Prepared;
+use PHPUnit\Event\TestData\{DataFromDataProvider, TestDataCollection};
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Metadata\{Metadata, MetadataCollection};
@@ -115,6 +116,26 @@ final class ApplySandboxSubscriberTest extends TestCase
         $subscriber->notify(new Prepared(
             TestEventFactory::telemetryInfo(),
             TestEventFactory::testMethod(SubscriberFixture::class, 'annotatedMethod'),
+        ));
+    }
+
+    #[Test]
+    public function failsWhenTheDataSetOfTheTestCannotBeRead(): void
+    {
+        $subscriber = new ApplySandboxSubscriber(new SandboxRegistry([new ConfVarsHandler()]));
+
+        // The running TestCase on the call stack is this test, not the one
+        // the event describes, so its data set must not be used.
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionCode(1753900402);
+
+        $subscriber->notify(new Prepared(
+            TestEventFactory::telemetryInfo(),
+            TestEventFactory::testMethod(
+                SubscriberFixture::class,
+                'annotatedMethod',
+                testData: TestDataCollection::fromArray([DataFromDataProvider::from('variant', '', '')]),
+            ),
         ));
     }
 

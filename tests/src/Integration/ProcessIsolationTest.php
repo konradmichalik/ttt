@@ -40,20 +40,21 @@ final class ProcessIsolationTest extends TestCase
     public function attributedTestsFailLoudlyWhileTestsWithoutAttributesAreUnaffected(): void
     {
         $root = dirname(__DIR__, 3);
-        $fixtureDirectory = $root.'/tests/fixtures/ProcessIsolation';
+        $fixtureDirectory = $root.'/tests/fixtures';
 
         exec(sprintf(
             '%s %s --no-coverage -c %s %s 2>&1',
             escapeshellarg(\PHP_BINARY),
             escapeshellarg($root.'/vendor/bin/phpunit'),
             escapeshellarg($fixtureDirectory.'/phpunit.xml'),
-            escapeshellarg($fixtureDirectory.'/ProcessIsolationFixtureTest.php'),
+            escapeshellarg($fixtureDirectory.'/ProcessIsolation/ProcessIsolationFixtureTest.php'),
         ), $output);
 
         $output = implode("\n", $output);
 
         self::assertStringContainsString('ProcessIsolationFixtureTest::attributedTestInSeparateProcess have no effect under process isolation', $output);
+        self::assertStringContainsString('ProcessIsolationFixtureTest::dataSetAttributeInSeparateProcess have no effect under process isolation', $output);
         self::assertStringNotContainsString('plainTestInSeparateProcess', $output);
-        self::assertStringContainsString('Tests: 2', $output);
+        self::assertStringContainsString('Tests: 3', $output);
     }
 }

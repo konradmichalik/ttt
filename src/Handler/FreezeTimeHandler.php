@@ -66,7 +66,6 @@ final class FreezeTimeHandler implements AttributeHandler
         $aspectsProperty = new ReflectionProperty(Context::class, 'aspects');
         /** @var array<string, AspectInterface> $aspectsSnapshot */
         $aspectsSnapshot = $aspectsProperty->getValue($context);
-        $existedDateAspect = array_key_exists('date', $aspectsSnapshot);
         $previousDateAspect = $aspectsSnapshot['date'] ?? null;
 
         $frozen = new DateTimeImmutable($attribute->dateTime);
@@ -79,7 +78,7 @@ final class FreezeTimeHandler implements AttributeHandler
         $GLOBALS['ACCESS_TIME'] = $timestamp - ($timestamp % 60);
         $GLOBALS['SIM_ACCESS_TIME'] = $timestamp - ($timestamp % 60);
 
-        return static function () use ($globalsSnapshot, $context, $existedContext, $existedDateAspect, $previousDateAspect): void {
+        return static function () use ($globalsSnapshot, $context, $existedContext, $previousDateAspect): void {
             foreach ($globalsSnapshot as $name => $value) {
                 if (null === $value) {
                     unset($GLOBALS[$name]);
@@ -96,7 +95,7 @@ final class FreezeTimeHandler implements AttributeHandler
                 return;
             }
 
-            if ($existedDateAspect && null !== $previousDateAspect) {
+            if (null !== $previousDateAspect) {
                 $context->setAspect('date', $previousDateAspect);
             } else {
                 $context->unsetAspect('date');

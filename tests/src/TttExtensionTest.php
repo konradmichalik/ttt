@@ -21,8 +21,7 @@ use PHPUnit\Event\EventFacadeIsSealedException;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Runner\Extension\{Facade, ParameterCollection};
-use PHPUnit\TextUI\Configuration\Configuration;
-use ReflectionClass;
+use PHPUnit\TextUI\Configuration\Registry as ConfigurationRegistry;
 use ReflectionMethod;
 use RuntimeException;
 use stdClass;
@@ -41,8 +40,7 @@ final class TttExtensionTest extends TestCase
     {
         $facade = new Facade();
 
-        // Configuration is final readonly and unused by bootstrap(), so a bare instance suffices.
-        $configuration = (new ReflectionClass(Configuration::class))->newInstanceWithoutConstructor();
+        $configuration = ConfigurationRegistry::get();
 
         // Both subscribers are constructed (with the fully populated registry) before being
         // handed to PHPUnit's event facade - which is already sealed inside a running suite,

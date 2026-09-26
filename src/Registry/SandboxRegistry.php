@@ -72,6 +72,14 @@ final class SandboxRegistry
     }
 
     /**
+     * @param class-string $className
+     */
+    public function hasAttributesFor(string $className, string $methodName): bool
+    {
+        return [] !== $this->resolveAttributes($className, $methodName);
+    }
+
+    /**
      * @throws Throwable The first restorer failure, after ALL restorers ran
      */
     public function restoreAll(): void

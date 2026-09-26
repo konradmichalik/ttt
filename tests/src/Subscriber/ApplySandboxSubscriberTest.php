@@ -19,8 +19,12 @@ use KonradMichalik\Ttt\Registry\SandboxRegistry;
 use KonradMichalik\Ttt\Subscriber\ApplySandboxSubscriber;
 use PHPUnit\Event\Code\Phpt;
 use PHPUnit\Event\Test\Prepared;
-use PHPUnit\Framework\Attributes\{CoversClass, Test};
+use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Metadata\{Metadata, MetadataCollection};
+use RuntimeException;
+
+use function class_exists;
 
 /**
  * ApplySandboxSubscriberTest.
@@ -65,6 +69,67 @@ final class ApplySandboxSubscriberTest extends TestCase
 
         self::assertArrayNotHasKey('TYPO3_CONF_VARS', $GLOBALS);
     }
+
+    /**
+     * @return iterable<string, array{Metadata}>
+     */
+    public static function processIsolationMetadata(): iterable
+    {
+        yield 'RunInSeparateProcess' => [Metadata::runInSeparateProcess()];
+        yield 'RunTestsInSeparateProcesses' => [Metadata::runTestsInSeparateProcesses()];
+
+        // Removed in PHPUnit 13.
+        if (class_exists('PHPUnit\Metadata\RunClassInSeparateProcess')) {
+            yield 'RunClassInSeparateProcess' => [Metadata::runClassInSeparateProcess()];
+        }
+    }
+
+    #[Test]
+    #[DataProvider('processIsolationMetadata')]
+    public function failsForAttributedTestsRunningInASeparateProcess(Metadata $metadata): void
+    {
+        $subscriber = new ApplySandboxSubscriber(new SandboxRegistry([new ConfVarsHandler()]));
+
+        try {
+            $subscriber->notify(new Prepared(
+                TestEventFactory::telemetryInfo(),
+                TestEventFactory::testMethod(SubscriberFixture::class, 'annotatedMethod', MetadataCollection::fromArray([$metadata])),
+            ));
+            self::fail('Expected a RuntimeException.');
+        } catch (RuntimeException $exception) {
+            self::assertStringContainsString(SubscriberFixture::class.'::annotatedMethod', $exception->getMessage());
+            self::assertStringContainsString('process isolation', $exception->getMessage());
+        }
+
+        self::assertArrayNotHasKey('TYPO3_CONF_VARS', $GLOBALS);
+    }
+
+    #[Test]
+    public function failsForAttributedTestsWhenProcessIsolationIsConfigured(): void
+    {
+        $subscriber = new ApplySandboxSubscriber(new SandboxRegistry([new ConfVarsHandler()]), true);
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionCode(1753900401);
+
+        $subscriber->notify(new Prepared(
+            TestEventFactory::telemetryInfo(),
+            TestEventFactory::testMethod(SubscriberFixture::class, 'annotatedMethod'),
+        ));
+    }
+
+    #[Test]
+    public function ignoresTestsWithoutAttributesRunningInASeparateProcess(): void
+    {
+        $subscriber = new ApplySandboxSubscriber(new SandboxRegistry([new ConfVarsHandler()]), true);
+
+        $subscriber->notify(new Prepared(
+            TestEventFactory::telemetryInfo(),
+            TestEventFactory::testMethod(SubscriberFixture::class, 'plainMethod', MetadataCollection::fromArray([Metadata::runInSeparateProcess()])),
+        ));
+
+        self::assertArrayNotHasKey('TYPO3_CONF_VARS', $GLOBALS);
+    }
 }
 
 /**
@@ -77,4 +142,6 @@ final class SubscriberFixture
 {
     #[WithTypo3ConfVars(['SYS' => ['fromSubscriber' => true]])]
     public function annotatedMethod(): void {}
+
+    public function plainMethod(): void {}
 }

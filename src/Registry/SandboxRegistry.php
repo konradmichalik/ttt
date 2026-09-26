@@ -28,9 +28,10 @@ use function array_pop;
  * SandboxRegistry.
  *
  * Collects Terrarium attributes for a given test (class-level first, then
- * method-level, then those of the current data set), applies them through their handlers and keeps the restorer
- * stack. Restoration runs in LIFO order and is guaranteed to execute every
- * restorer, even if one of them throws.
+ * method-level, then those of the current data set), applies them through
+ * their handlers and keeps the restorer stack. Restoration runs in LIFO
+ * order and is guaranteed to execute every restorer, even if one of them
+ * throws.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-3.0-or-later

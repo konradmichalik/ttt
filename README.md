@@ -109,7 +109,7 @@ public function showsMaintenanceButton(WithBackendUser $user, bool $expected): v
 
 - The test method has to accept the attribute as a parameter. PHPUnit 12+ fails the run with a warning when a data set has more values than the method has parameters.
 - Class- and method-level attributes apply first, data set attributes afterwards, so they take precedence for the same state.
-- Other values in the data set (like `$expected` above) are ignored by *ttt*. A data set may carry several attributes.
+- Other values in the data set (like `$expected` above) are ignored by *ttt*. A data set may carry several attributes, as top-level values: attributes nested inside an array are not picked up.
 - `#[DataProvider]` works the same way, for variants that don't fit into attribute arguments.
 - Docblock `@testWith` annotations are not supported, and neither is process isolation (see [`docs/lifecycle.md`](docs/lifecycle.md#process-isolation)). PHPUnit 10.5 ignores the name argument of `#[TestWith]`.
 

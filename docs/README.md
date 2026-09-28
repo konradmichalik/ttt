@@ -12,6 +12,7 @@
 - [`#[WithTypo3ConfVars]`](attributes/with-typo3-conf-vars.md): deep-merges configuration into `$GLOBALS['TYPO3_CONF_VARS']`
 - [`#[WithTca]`](attributes/with-tca.md): deep-merges configuration into `$GLOBALS['TCA'][$table]`
 - [`#[WithGlobal]`](attributes/with-global.md): sets an arbitrary `$GLOBALS` entry
+- [`#[WithSuperglobal]`](attributes/with-superglobal.md): sets a single key of `$_SERVER`, `$_GET`, `$_POST` or `$_ENV`
 - [`#[WithEnvVar]`](attributes/with-env-var.md): sets an environment variable across `putenv()`, `$_ENV` and `$_SERVER`
 - [`#[WithEnvironment]`](attributes/with-environment.md): bootstraps TYPO3's `Environment` for a single test
 - [`#[InApplicationContext]`](attributes/in-application-context.md): switches the TYPO3 application context for one test

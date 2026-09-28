@@ -30,6 +30,7 @@
 - [Assertion kit](kits/assertion.md): dot-path based JSON assertions
 - [Contract kit](kits/contract.md): generates violation-case tests from a `validateConfiguration()`-style contract
 - [Fixture kit](kits/fixture.md): disposable test fixtures (images, log files)
+- [Object builder](kits/object-builder.md): constructs an instance without calling its constructor, injecting properties via reflection
 
 ## Guides
 

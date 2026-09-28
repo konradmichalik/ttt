@@ -41,6 +41,14 @@ $request = Requests::get('/')
     ->build(); // withAttribute('site', ...): getSettings() returns a real SiteSettings instance
 ```
 
+### `site` attribute with a fully functional `Site`
+
+```php
+$request = Requests::get('/')
+    ->withSite('main', 1, ['base' => 'https://example.com/'])
+    ->build(); // real Site: getIdentifier(), getRootPageId(), getBase(), getLanguages() all work
+```
+
 ### Opting out of `normalizedParams`
 
 ```php
@@ -99,5 +107,25 @@ $request = Requests::get('/api/count')
 ```
 
 `withSiteSettings()` builds a *real* `SiteSettings` instance (via `SiteSettings::createFromSettingsTree()`), not a mock: `SiteSettings` is `final readonly` in TYPO3 13.4/14.0 and therefore cannot be mocked with PHPUnit. `get()`/`has()` behave exactly like production, including dot-path lookups for nested settings (`->withSiteSettings(['maintenance' => ['enabled' => true]])` → `get('maintenance.enabled')`). The `Site` object returned as the `'site'` attribute only has `getSettings()` wired up; calling any other `Site` method (`getIdentifier()`, `getRootPageId()`, ...) fails, same "covers the 80% case" scope as [`#[WithBackendUser]`](../attributes/with-backend-user.md).
+
+### Full `Site` construction (URL generation, base path resolution)
+
+**Before:**
+
+```php
+$site = new Site('main', 1, ['base' => 'https://example.com/']);
+
+$request = (new ServerRequest(...))->withAttribute('site', $site);
+```
+
+**After:**
+
+```php
+$request = Requests::get('/')
+    ->withSite('main', 1, ['base' => 'https://example.com/'])
+    ->build();
+```
+
+Unlike `withSiteSettings()`, `withSite()` constructs a real `Site` (TYPO3's `Site` class needs no mocking; it's a plain constructible entity), so every method works: `getIdentifier()`, `getRootPageId()`, `getBase()`, `getLanguages()`, and more, driven entirely by the `$configuration` array (`base`, `languages`, `baseVariants`, ...).
 
 `Requests`/`RequestBuilder` without an initialized `Environment`: `normalizedParams` is derived via `NormalizedParams::createFromRequest()`, which requires TYPO3's `Environment` to be initialized (e.g. via [`#[WithEnvironment]`](../attributes/with-environment.md)). If it is not, the attribute is silently omitted rather than throwing, equivalent to calling `->withoutNormalizedParams()` explicitly.

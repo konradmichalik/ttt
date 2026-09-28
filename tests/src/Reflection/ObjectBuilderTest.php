@@ -82,10 +82,10 @@ final class ObjectBuilderTest extends TestCase
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-3.0-or-later
  */
-final class ObjectBuilderFixture
+final readonly class ObjectBuilderFixture
 {
     public function __construct(
-        private readonly stdClass $dependency,
+        private stdClass $dependency,
         private string $name = 'default',
     ) {}
 

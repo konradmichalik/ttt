@@ -185,6 +185,48 @@ final class RequestBuilderTest extends TestCase
         self::assertSame('application/json', $request->getHeaderLine('Content-Type'));
     }
 
+    #[Test]
+    public function withSiteBuildsAFullyFunctionalSite(): void
+    {
+        $request = Requests::get('/api/count')
+            ->withSite('main', 1, ['base' => 'https://example.com/'])
+            ->withoutNormalizedParams()
+            ->build();
+
+        $site = $this->siteFromRequest($request);
+
+        self::assertSame('main', $site->getIdentifier());
+        self::assertSame(1, $site->getRootPageId());
+        self::assertSame('https://example.com/', (string) $site->getBase());
+    }
+
+    #[Test]
+    public function withSiteDefaultsToAnEmptyConfiguration(): void
+    {
+        $request = Requests::get('/api/count')
+            ->withSite('main', 1)
+            ->withoutNormalizedParams()
+            ->build();
+
+        $site = $this->siteFromRequest($request);
+
+        self::assertSame('main', $site->getIdentifier());
+        self::assertNotEmpty($site->getLanguages());
+    }
+
+    #[Test]
+    public function withSiteComposesWithOtherBuilderMethods(): void
+    {
+        $request = Requests::post('/api/items')
+            ->withSite('main', 1, ['base' => 'https://example.com/'])
+            ->withJsonBody(['title' => 'Terrarium'])
+            ->withoutNormalizedParams()
+            ->build();
+
+        self::assertSame('main', $this->siteFromRequest($request)->getIdentifier());
+        self::assertSame('application/json', $request->getHeaderLine('Content-Type'));
+    }
+
     private function siteFromRequest(ServerRequestInterface $request): Site
     {
         $site = $request->getAttribute('site');

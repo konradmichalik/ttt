@@ -13,11 +13,10 @@ declare(strict_types=1);
 
 namespace KonradMichalik\Ttt\Handler;
 
-use PHPUnit\Framework\TestCase;
+use KonradMichalik\Ttt\Runtime\RunningTestCase;
 use RuntimeException;
 
 use function class_exists;
-use function debug_backtrace;
 use function is_subclass_of;
 use function sprintf;
 
@@ -56,29 +55,10 @@ final class FunctionalTestCaseGuard
             // @codeCoverageIgnoreEnd
         }
 
-        $testClassName = self::currentTestClassName();
+        $testCase = RunningTestCase::find();
 
-        if (null !== $testClassName && is_subclass_of($testClassName, self::FUNCTIONAL_TEST_CASE)) {
-            throw new RuntimeException(sprintf('%s cannot be used on FunctionalTestCase (%s): %s. %s', $attributeName, $testClassName, $reason, $alternative), 1753900001);
+        if (null !== $testCase && is_subclass_of($testCase, self::FUNCTIONAL_TEST_CASE)) {
+            throw new RuntimeException(sprintf('%s cannot be used on FunctionalTestCase (%s): %s. %s', $attributeName, $testCase::class, $reason, $alternative), 1753900001);
         }
-    }
-
-    private static function currentTestClassName(): ?string
-    {
-        foreach (debug_backtrace(\DEBUG_BACKTRACE_PROVIDE_OBJECT | \DEBUG_BACKTRACE_IGNORE_ARGS) as $frame) {
-            $object = $frame['object'] ?? null;
-
-            if ($object instanceof TestCase) {
-                return $object::class;
-            }
-        }
-
-        // Defensive: assertNotFunctionalTestCase() only reaches this call
-        // while ttt's own PHPUnit extension is applying attributes for a
-        // running test, which always has a TestCase instance somewhere in
-        // the call stack.
-        // @codeCoverageIgnoreStart
-        return null;
-        // @codeCoverageIgnoreEnd
     }
 }

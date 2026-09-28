@@ -30,11 +30,13 @@ return RectorConfig::configure()
         AddVoidReturnTypeWhereNoReturnRector::class,
     ])
     ->withSkip([
-        // FunctionalTestCaseGuard deliberately uses a string literal instead of ::class:
-        // typo3/testing-framework is never a dependency, so the class may not exist to reference,
-        // and ::class there would break PHPStan's class.notFound check.
+        // These files deliberately use string literals instead of ::class for classes that may not
+        // exist: typo3/testing-framework is never a dependency, and #[RunClassInSeparateProcess]
+        // was removed in PHPUnit 13. ::class there would break PHPStan's class.notFound check.
         StringClassNameToClassConstantRector::class => [
             __DIR__.'/src/Handler/FunctionalTestCaseGuard.php',
+            __DIR__.'/src/Subscriber/ApplySandboxSubscriber.php',
+            __DIR__.'/tests/src/Subscriber/ApplySandboxSubscriberTest.php',
         ],
     ])
 ;

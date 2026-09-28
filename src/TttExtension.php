@@ -78,7 +78,7 @@ final class TttExtension implements Extension
         ]);
 
         $facade->registerSubscribers(
-            new ApplySandboxSubscriber($registry),
+            new ApplySandboxSubscriber($registry, $configuration->processIsolation()),
             new RestoreSandboxSubscriber($registry),
         );
     }

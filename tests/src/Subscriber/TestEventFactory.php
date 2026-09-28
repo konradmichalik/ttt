@@ -51,7 +51,7 @@ final class TestEventFactory
      * @param class-string     $className
      * @param non-empty-string $methodName
      */
-    public static function testMethod(string $className, string $methodName): TestMethod
+    public static function testMethod(string $className, string $methodName, ?MetadataCollection $metadata = null, ?TestDataCollection $testData = null): TestMethod
     {
         return new TestMethod(
             $className,
@@ -59,8 +59,8 @@ final class TestEventFactory
             'FakeTest.php',
             1,
             new TestDox('Fake', $methodName, $methodName),
-            MetadataCollection::fromArray([]),
-            TestDataCollection::fromArray([]),
+            $metadata ?? MetadataCollection::fromArray([]),
+            $testData ?? TestDataCollection::fromArray([]),
         );
     }
 }

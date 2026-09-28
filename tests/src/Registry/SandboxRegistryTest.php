@@ -83,6 +83,34 @@ final class SandboxRegistryTest extends TestCase
     }
 
     #[Test]
+    public function appliesDataSetAttributesAfterClassAndMethodLevelAttributes(): void
+    {
+        $registry = new SandboxRegistry([new ConfVarsHandler()]);
+
+        $registry->applyFor(AnnotatedFixture::class, 'annotatedMethod', [
+            new WithTypo3ConfVars(['SYS' => ['sitename' => 'data set']]),
+        ]);
+
+        self::assertSame('data set', $GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename']);
+        self::assertTrue($GLOBALS['TYPO3_CONF_VARS']['SYS']['fromClass']);
+
+        $registry->restoreAll();
+
+        self::assertArrayNotHasKey('TYPO3_CONF_VARS', $GLOBALS);
+    }
+
+    #[Test]
+    public function hasAttributesForReportsClassAndMethodLevelAttributesWithoutApplyingThem(): void
+    {
+        $registry = new SandboxRegistry([new ConfVarsHandler()]);
+
+        self::assertTrue($registry->hasAttributesFor(AnnotatedFixture::class, 'methodThatDoesNotExist'));
+        self::assertTrue($registry->hasAttributesFor(PlainFixture::class, 'annotatedMethod'));
+        self::assertFalse($registry->hasAttributesFor(PlainFixture::class, 'plainMethod'));
+        self::assertArrayNotHasKey('TYPO3_CONF_VARS', $GLOBALS);
+    }
+
+    #[Test]
     public function restoreAllRunsEveryRestorerEvenIfOneThrows(): void
     {
         $order = [];
@@ -121,6 +149,20 @@ final class AnnotatedFixture
 
     #[WithEnvVar('TTT_REGISTRY_VAR', 'on')]
     public function mixedMethod(): void {}
+}
+
+/**
+ * PlainFixture.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-3.0-or-later
+ */
+final class PlainFixture
+{
+    #[WithEnvVar('TTT_REGISTRY_VAR', 'on')]
+    public function annotatedMethod(): void {}
+
+    public function plainMethod(): void {}
 }
 
 /**

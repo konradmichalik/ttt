@@ -138,6 +138,19 @@ final class RequestBuilder
         return $this->withAttribute('site', $site);
     }
 
+    /**
+     * Sets the "site" attribute to a real, fully functional Site instance
+     * built from the given identifier, root page ID and configuration (base,
+     * languages, ...). Unlike withSiteSettings(), every Site method works as
+     * expected, not just getSettings().
+     *
+     * @param array<string, mixed> $configuration
+     */
+    public function withSite(string $identifier, int $rootPageId, array $configuration = []): self
+    {
+        return $this->withAttribute('site', new Site($identifier, $rootPageId, $configuration));
+    }
+
     public function withoutNormalizedParams(): self
     {
         $this->withNormalizedParams = false;

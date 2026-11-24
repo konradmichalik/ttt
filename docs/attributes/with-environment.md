@@ -78,7 +78,7 @@ use KonradMichalik\Ttt\Attribute\WithEnvironment;
 final class PathUtilityTest extends TestCase {}
 ```
 
-If you need a fixed directory instead of a temporary one: `#[WithEnvironment(projectPath: '/path', temporaryProjectPath: false)]`.
+If you need a fixed directory instead of a temporary one: `#[WithEnvironment(projectPath: '/path', temporaryProjectPath: false)]`. `temporaryProjectPath: false` without a `projectPath` throws, the shared system temp directory is never used as project root.
 
 If a test resolves an absolute asset path (fonts, image fixtures) that must live *inside the extension itself* via `GeneralUtility::getFileAbsFileName()`, a temporary or otherwise-fixed `projectPath` puts that path outside `Environment::getProjectPath()` and resolution silently returns `''`. Use the `'self'` sentinel instead: it roots the sandbox at the consuming package's own directory (found by walking up from the running test's file to the nearest `composer.json`), so paths inside the extension keep resolving:
 
@@ -86,5 +86,7 @@ If a test resolves an absolute asset path (fonts, image fixtures) that must live
 #[WithEnvironment(projectPath: 'self', temporaryProjectPath: false)]
 final class AbstractRenderingTestCase extends TestCase {}
 ```
+
+The handler creates `public/`, `var/` and `config/` inside the package root and does not remove them. Add them to your `.gitignore`.
 
 **Caution, semantic change:** `setUpBeforeClass` ran once per class, the attribute runs per test. This is intended (isolation) but costs minimal runtime through mkdir/rmdir. For very large classes with purely read-only access to the paths this is negligible.

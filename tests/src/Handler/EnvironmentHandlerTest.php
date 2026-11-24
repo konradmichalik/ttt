@@ -15,7 +15,7 @@ namespace KonradMichalik\Ttt\Tests\Handler;
 
 use KonradMichalik\Ttt\Attribute\{InApplicationContext, WithEnvironment};
 use KonradMichalik\Ttt\Handler\{ApplicationContextHandler, EnvironmentHandler};
-use PHPUnit\Framework\Attributes\{CoversClass, PreserveGlobalState, RunInSeparateProcess, Test};
+use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use TYPO3\CMS\Core\Core\Environment;
@@ -65,22 +65,12 @@ final class EnvironmentHandlerTest extends TestCase
     }
 
     #[Test]
-    #[RunInSeparateProcess]
-    #[PreserveGlobalState(false)]
-    public function usesTheSystemTemporaryDirectoryAsProjectRootWhenRequested(): void
+    public function refusesToUseTheSystemTemporaryDirectoryAsProjectRoot(): void
     {
-        $temp = sys_get_temp_dir();
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionCode(1752561605);
 
-        $restore = (new EnvironmentHandler())->apply(new WithEnvironment(temporaryProjectPath: false));
-
-        self::assertSame($temp, Environment::getProjectPath());
-
-        $restore();
-
-        // The system temp root is reused (not created by us); only prune the empty scaffolding.
-        foreach (['public', 'var', 'config'] as $directory) {
-            @rmdir($temp.'/'.$directory);
-        }
+        (new EnvironmentHandler())->apply(new WithEnvironment(temporaryProjectPath: false));
     }
 
     #[Test]

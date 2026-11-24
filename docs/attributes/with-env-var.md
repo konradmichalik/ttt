@@ -67,12 +67,6 @@ final class SomeFunctionalTest extends FunctionalTestCase
 {
     use EnvVarSandbox;
 
-    protected function tearDown(): void
-    {
-        $this->restoreEnvVars();
-        parent::tearDown();
-    }
-
     #[Test]
     public function acceptsTheConfiguredToken(): void
     {

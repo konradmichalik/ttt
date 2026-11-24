@@ -16,13 +16,15 @@ namespace KonradMichalik\Ttt\Traits;
 use Closure;
 use KonradMichalik\Ttt\Attribute\WithTypo3ConfVars;
 use KonradMichalik\Ttt\Handler\ConfVarsHandler;
+use PHPUnit\Framework\Attributes\After;
 
 /**
  * ConfVarsSandbox.
  *
  * Imperative alternative to the WithTypo3ConfVars attribute for tests that
  * need to manipulate TYPO3_CONF_VARS mid-test or do not run with the
- * TttExtension enabled. Call restoreTypo3ConfVars() in tearDown().
+ * TttExtension enabled. restoreTypo3ConfVars() runs automatically after each
+ * test through PHPUnit's #[After] hook and can also be called earlier.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-3.0-or-later
@@ -42,6 +44,7 @@ trait ConfVarsSandbox
         );
     }
 
+    #[After]
     protected function restoreTypo3ConfVars(): void
     {
         while ([] !== $this->confVarsRestorers) {

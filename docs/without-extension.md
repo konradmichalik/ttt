@@ -9,11 +9,6 @@ final class HandlerTest extends TestCase
 {
     use ConfVarsSandbox;
 
-    protected function tearDown(): void
-    {
-        $this->restoreTypo3ConfVars();
-    }
-
     #[Test]
     public function resolvesConfiguration(): void
     {
@@ -22,3 +17,5 @@ final class HandlerTest extends TestCase
     }
 }
 ```
+
+The trait restores its state after every test through a PHPUnit `#[After]` hook, no `tearDown()` is needed.

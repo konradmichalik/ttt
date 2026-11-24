@@ -14,11 +14,14 @@ declare(strict_types=1);
 namespace KonradMichalik\Ttt\Contract;
 
 use Generator;
+use LogicException;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
-use function is_int;
+use function array_pad;
+use function implode;
+use function in_array;
 use function sprintf;
 use function str_contains;
 use function str_ends_with;
@@ -62,6 +65,8 @@ use function substr;
  */
 abstract class ConfigurationValidationContract extends TestCase
 {
+    private const TYPES = ['string', 'int', 'float', 'bool', 'array', 'enum'];
+
     private const UNRECOGNIZED_ENUM_VALUE = '__ttt_unrecognized_enum_value__';
 
     #[Test]
@@ -122,11 +127,11 @@ abstract class ConfigurationValidationContract extends TestCase
                 [$min, $max] = $range;
 
                 $violation = $valid;
-                $violation[$name] = is_int($valid[$name] ?? 0) ? $min - 1 : $min - 1.0;
+                $violation[$name] = 'int' === $type ? (int) $min - 1 : $min - 1.0;
                 yield sprintf('"%s" below minimum', $name) => $violation;
 
                 $violation = $valid;
-                $violation[$name] = is_int($valid[$name] ?? 0) ? $max + 1 : $max + 1.0;
+                $violation[$name] = 'int' === $type ? (int) $max + 1 : $max + 1.0;
                 yield sprintf('"%s" above maximum', $name) => $violation;
             }
 
@@ -143,14 +148,22 @@ abstract class ConfigurationValidationContract extends TestCase
      */
     private static function parseDefinition(string $definition): array
     {
-        if (!str_contains($definition, ':')) {
-            return [$definition, null, null];
+        [$type, $rawConstraint] = array_pad(explode(':', $definition, 2), 2, null);
+
+        if (!in_array($type, self::TYPES, true)) {
+            throw new LogicException(sprintf('Unknown type "%s" in schema definition "%s". Known types: %s.', $type, $definition, implode(', ', self::TYPES)), 1752561606);
         }
 
-        [$type, $rawConstraint] = explode(':', $definition, 2);
+        if (null === $rawConstraint) {
+            return [$type, null, null];
+        }
 
         if ('enum' === $type) {
             return [$type, null, explode('|', $rawConstraint)];
+        }
+
+        if (!in_array($type, ['int', 'float'], true) || !str_contains($rawConstraint, '..')) {
+            throw new LogicException(sprintf('Invalid constraint in schema definition "%s". Expected "int:min..max" or "float:min..max".', $definition), 1752561607);
         }
 
         [$min, $max] = explode('..', $rawConstraint, 2);

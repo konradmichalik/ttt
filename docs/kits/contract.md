@@ -40,6 +40,10 @@ protected function schema(): array
 
 Generates a wrong-type violation and, additionally, an "unrecognized value" violation for a `string` that isn't one of the listed options.
 
+### Ranges
+
+`int:1..10` generates the integers `0` and `11`, `float:0..1` the floats `-1.0` and `2.0`. An unknown type (`strng`), a range without `..` or a constraint on a type other than `int`, `float` and `enum` throws a `LogicException`, so a typo in the schema fails the test.
+
 ### Optional keys
 
 ```php

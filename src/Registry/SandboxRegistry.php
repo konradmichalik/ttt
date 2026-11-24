@@ -21,6 +21,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use Throwable;
 
+use function array_map;
 use function array_merge;
 use function array_pop;
 
@@ -42,12 +43,12 @@ final class SandboxRegistry
     private array $restorers = [];
 
     /**
-     * Attribute lookups run for every single test, so results are memoized
-     * per class-level and per method-level target. Caching the resolved
-     * instances is safe: Terrarium attributes are readonly DTOs and handlers
-     * never mutate them.
+     * Attribute lookups run for every single test, so the reflection results
+     * are memoized per class-level and per method-level target. Only the
+     * ReflectionAttribute objects are cached; instances are created per test,
+     * so object arguments (fakes, stubs) are never shared between tests.
      *
-     * @var array<string, list<TttAttribute>>
+     * @var array<string, list<ReflectionAttribute<TttAttribute>>>
      */
     private array $attributeCache = [];
 
@@ -64,7 +65,12 @@ final class SandboxRegistry
      */
     public function applyFor(string $className, string $methodName, array $dataSetAttributes = []): void
     {
-        foreach ([...$this->resolveAttributes($className, $methodName), ...$dataSetAttributes] as $attribute) {
+        $attributes = array_map(
+            static fn (ReflectionAttribute $attribute): TttAttribute => $attribute->newInstance(),
+            $this->resolveAttributes($className, $methodName),
+        );
+
+        foreach ([...$attributes, ...$dataSetAttributes] as $attribute) {
             foreach ($this->handlers as $handler) {
                 if ($handler->supports($attribute)) {
                     $this->restorers[] = $handler->apply($attribute);
@@ -106,7 +112,7 @@ final class SandboxRegistry
     /**
      * @param class-string $className
      *
-     * @return list<TttAttribute>
+     * @return list<ReflectionAttribute<TttAttribute>>
      */
     private function resolveAttributes(string $className, string $methodName): array
     {
@@ -119,23 +125,17 @@ final class SandboxRegistry
     /**
      * @param class-string $className
      *
-     * @return list<TttAttribute>
+     * @return list<ReflectionAttribute<TttAttribute>>
      */
     private static function classAttributes(string $className): array
     {
-        $attributes = [];
-
-        foreach ((new ReflectionClass($className))->getAttributes(TttAttribute::class, ReflectionAttribute::IS_INSTANCEOF) as $attribute) {
-            $attributes[] = $attribute->newInstance();
-        }
-
-        return $attributes;
+        return (new ReflectionClass($className))->getAttributes(TttAttribute::class, ReflectionAttribute::IS_INSTANCEOF);
     }
 
     /**
      * @param class-string $className
      *
-     * @return list<TttAttribute>
+     * @return list<ReflectionAttribute<TttAttribute>>
      */
     private static function methodAttributes(string $className, string $methodName): array
     {
@@ -145,12 +145,6 @@ final class SandboxRegistry
             return [];
         }
 
-        $attributes = [];
-
-        foreach ((new ReflectionMethod($className, $methodName))->getAttributes(TttAttribute::class, ReflectionAttribute::IS_INSTANCEOF) as $attribute) {
-            $attributes[] = $attribute->newInstance();
-        }
-
-        return $attributes;
+        return (new ReflectionMethod($className, $methodName))->getAttributes(TttAttribute::class, ReflectionAttribute::IS_INSTANCEOF);
     }
 }

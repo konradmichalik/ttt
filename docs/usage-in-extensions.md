@@ -108,6 +108,6 @@ Together the two pilots cover all attribute types — only roll out broadly afte
 
 **Performance:**
 
-- The attribute resolution (reflection) runs for *every* test and is therefore memoized: per class resp. per class+method it reflects exactly once; repeat runs (DataProvider cases!) only hit the cache. Attribute instances are readonly DTOs and thus safe to reuse.
+- The attribute resolution (reflection) runs for *every* test and is therefore memoized: per class resp. per class+method it reflects exactly once; repeat runs (DataProvider cases!) only hit the cache. Only the `ReflectionAttribute` objects are cached; attribute instances are created per test, so object arguments are never shared between tests.
 - Tests without Terrarium attributes cost one cache lookup plus an empty restore call per test — in the microsecond range, no measurable suite overhead.
 - The most expensive handler is `#[WithEnvironment]` (mkdir/rmdir per test). For I/O-sensitive huge classes, use it sparingly at class level; an optional class scope is planned as a later extension.

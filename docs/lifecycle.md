@@ -14,6 +14,10 @@ attributes restored            (PHPUnit\Event\Test\Finished, fires even on failu
 
 `setUp()` never observes Terrarium-managed state; `tearDown()` still does, since restoration runs after it. By then, though, the test's result is already determined, so nothing an attribute does in `tearDown()` can affect a passed/failed outcome. If `setUp()` needs to see sandboxed state, apply it imperatively instead: see [`docs/without-extension.md`](without-extension.md).
 
+## Failing handlers
+
+If a handler throws while attributes are applied, Terrarium rolls back every attribute applied so far and rethrows. PHPUnit reports the exception as a runner warning and still runs the test body, now without any Terrarium state. Do not disable `failOnPhpunitWarning`, otherwise the failure goes unnoticed.
+
 ## Process isolation
 
 With `#[RunInSeparateProcess]`, `#[RunTestsInSeparateProcesses]` or `processIsolation="true"`, PHPUnit runs the test body in a child process and forwards its events to the parent afterwards. Terrarium receives `Test\Prepared` in the parent, after the test body already finished, so attributes cannot take effect there.

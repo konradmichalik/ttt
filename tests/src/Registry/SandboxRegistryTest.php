@@ -134,6 +134,22 @@ final class SandboxRegistryTest extends TestCase
     }
 
     #[Test]
+    public function rollsBackAlreadyAppliedAttributesWhenAHandlerFails(): void
+    {
+        $registry = new SandboxRegistry([new ConfVarsHandler(), new FailingHandler()]);
+
+        try {
+            $registry->applyFor(FailingFixture::class, 'method');
+            self::fail('Expected RuntimeException was not thrown.');
+        } catch (RuntimeException $exception) {
+            self::assertSame(1752561601, $exception->getCode());
+        }
+
+        self::assertArrayNotHasKey('TYPO3_CONF_VARS', $GLOBALS);
+        $registry->restoreAll();
+    }
+
+    #[Test]
     public function restoreAllRunsEveryRestorerEvenIfOneThrows(): void
     {
         $order = [];
@@ -198,6 +214,38 @@ final class ObjectArgumentFixture
 {
     #[WithGlobal('ttt_shared', new stdClass())]
     public function method(): void {}
+}
+
+/**
+ * FailingFixture.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-3.0-or-later
+ */
+final class FailingFixture
+{
+    #[WithTypo3ConfVars(['SYS' => ['sitename' => 'applied']])]
+    #[WithEnvVar('TTT_REGISTRY_VAR', 'on')]
+    public function method(): void {}
+}
+
+/**
+ * FailingHandler.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-3.0-or-later
+ */
+final class FailingHandler implements \KonradMichalik\Ttt\Handler\AttributeHandler
+{
+    public function supports(TttAttribute $attribute): bool
+    {
+        return $attribute instanceof WithEnvVar;
+    }
+
+    public function apply(TttAttribute $attribute): Closure
+    {
+        throw new RuntimeException('apply failed', 1752561601);
+    }
 }
 
 /**

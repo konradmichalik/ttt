@@ -62,20 +62,32 @@ final class SandboxRegistry
     /**
      * @param class-string       $className
      * @param list<TttAttribute> $dataSetAttributes applied last, so they take precedence
+     *
+     * @throws Throwable The handler failure, after already applied attributes were rolled back
      */
     public function applyFor(string $className, string $methodName, array $dataSetAttributes = []): void
     {
-        $attributes = array_map(
-            static fn (ReflectionAttribute $attribute): TttAttribute => $attribute->newInstance(),
-            $this->resolveAttributes($className, $methodName),
-        );
+        try {
+            $attributes = array_map(
+                static fn (ReflectionAttribute $attribute): TttAttribute => $attribute->newInstance(),
+                $this->resolveAttributes($className, $methodName),
+            );
 
-        foreach ([...$attributes, ...$dataSetAttributes] as $attribute) {
-            foreach ($this->handlers as $handler) {
-                if ($handler->supports($attribute)) {
-                    $this->restorers[] = $handler->apply($attribute);
+            foreach ([...$attributes, ...$dataSetAttributes] as $attribute) {
+                foreach ($this->handlers as $handler) {
+                    if ($handler->supports($attribute)) {
+                        $this->restorers[] = $handler->apply($attribute);
+                    }
                 }
             }
+        } catch (Throwable $throwable) {
+            try {
+                $this->restoreAll();
+            } catch (Throwable) {
+                // The apply failure is the root cause and takes precedence.
+            }
+
+            throw $throwable;
         }
     }
 

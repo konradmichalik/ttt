@@ -109,8 +109,8 @@ final class ObjectBuilderTest extends TestCase
 abstract class ObjectBuilderParentFixture
 {
     // Written through reflection by ObjectBuilder only.
-    // @phpstan-ignore property.onlyRead
-    private stdClass $dependency;
+    // @phpstan-ignore property.uninitializedReadonly, property.onlyRead
+    private readonly stdClass $dependency;
 
     public function dependency(): stdClass
     {

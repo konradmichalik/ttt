@@ -40,6 +40,7 @@
 	},
 	"suggest": {
 		"ext-gd": "Required for ImageFixtures",
+		"phpstan/extension-installer": "Activates the PHPStan rule that points direct global state changes in tests to ttt attributes (^1.4)",
 		"typo3/cms-core": "Required for TYPO3-specific attributes like InApplicationContext and WithEnvironment (^13.4 || ^14.0)",
 		"typo3/cms-frontend": "Required for WithFrontendUser (^13.4 || ^14.0)"
 	},
@@ -66,6 +67,13 @@
 			"php": "8.2.0"
 		},
 		"sort-packages": true
+	},
+	"extra": {
+		"phpstan": {
+			"includes": [
+				"extension.neon"
+			]
+		}
 	},
 	"scripts": {
 		"fix": [

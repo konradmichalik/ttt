@@ -30,8 +30,9 @@ use function sprintf;
 /**
  * SandboxRegistry.
  *
- * Collects Terrarium attributes for a given test (class-level first, then
- * method-level, then those of the current data set), applies them through
+ * Collects Terrarium attributes for a given test (class-level including
+ * parent classes, parents first, then method-level, then those of the
+ * current data set), applies them through
  * their handlers and keeps the restorer stack. Restoration runs in LIFO
  * order and is guaranteed to execute every restorer, even if one of them
  * throws.
@@ -151,7 +152,19 @@ final class SandboxRegistry
      */
     private static function classAttributes(string $className): array
     {
-        return (new ReflectionClass($className))->getAttributes(TttAttribute::class, ReflectionAttribute::IS_INSTANCEOF);
+        $attributes = [];
+        $reflectionClass = new ReflectionClass($className);
+
+        // Parents first, so attributes of the concrete test class win.
+        while (false !== $reflectionClass) {
+            $attributes = [
+                ...$reflectionClass->getAttributes(TttAttribute::class, ReflectionAttribute::IS_INSTANCEOF),
+                ...$attributes,
+            ];
+            $reflectionClass = $reflectionClass->getParentClass();
+        }
+
+        return $attributes;
     }
 
     /**

@@ -162,6 +162,21 @@ final class SandboxRegistryTest extends TestCase
     }
 
     #[Test]
+    public function appliesParentClassAttributesAndLetsTheChildWin(): void
+    {
+        $registry = new SandboxRegistry([new ConfVarsHandler()]);
+
+        $registry->applyFor(ChildFixture::class, 'method');
+
+        self::assertTrue($GLOBALS['TYPO3_CONF_VARS']['SYS']['fromParent']);
+        self::assertSame('child', $GLOBALS['TYPO3_CONF_VARS']['SYS']['sitename']);
+
+        $registry->restoreAll();
+
+        self::assertArrayNotHasKey('TYPO3_CONF_VARS', $GLOBALS);
+    }
+
+    #[Test]
     public function restoreAllRunsEveryRestorerEvenIfOneThrows(): void
     {
         $order = [];
@@ -225,6 +240,27 @@ final class PlainFixture
 final class ObjectArgumentFixture
 {
     #[WithGlobal('ttt_shared', new stdClass())]
+    public function method(): void {}
+}
+
+/**
+ * ParentFixture.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-3.0-or-later
+ */
+#[WithTypo3ConfVars(['SYS' => ['fromParent' => true, 'sitename' => 'parent']])]
+abstract class ParentFixture {}
+
+/**
+ * ChildFixture.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-3.0-or-later
+ */
+#[WithTypo3ConfVars(['SYS' => ['sitename' => 'child']])]
+final class ChildFixture extends ParentFixture
+{
     public function method(): void {}
 }
 

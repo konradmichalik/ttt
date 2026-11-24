@@ -35,7 +35,11 @@
 		"typo3/cms-core": "^13.4 || ^14.0",
 		"typo3/cms-frontend": "^13.4 || ^14.0"
 	},
+	"conflict": {
+		"typo3/cms-core": "<13.4 || >=15.0"
+	},
 	"suggest": {
+		"ext-gd": "Required for ImageFixtures",
 		"typo3/cms-core": "Required for TYPO3-specific attributes like InApplicationContext and WithEnvironment (^13.4 || ^14.0)",
 		"typo3/cms-frontend": "Required for WithFrontendUser (^13.4 || ^14.0)"
 	},

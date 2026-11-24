@@ -18,13 +18,22 @@ use Attribute;
 /**
  * WithGlobal.
  *
- * Sets an arbitrary $GLOBALS entry before the test is prepared and restores
+ * Sets an arbitrary $GLOBALS entry before the test body runs (after setUp()) and restores
  * the previous value (including a previously unset key) afterwards. For
  * $GLOBALS['TYPO3_CONF_VARS'] specifically, prefer WithTypo3ConfVars, which
  * deep-merges instead of overwriting.
  *
  * <code>
- * #[WithGlobal('TYPO3_REQUEST', $request)]
+ * #[WithGlobal('MY_APP_SETTINGS', ['mode' => 'strict'])]
+ * public function behavesInStrictMode(): void {}
+ * </code>
+ *
+ * Attribute arguments must be constant expressions. For a value that cannot be
+ * written as one (a prepared request, a mock), assign it inside the test and
+ * use the imperative sandboxes instead.
+ *
+ * <code>
+ * #[WithGlobal('TYPO3_REQUEST', new ServerRequest('https://example.com/'))]
  * public function resolvesFromCurrentRequest(): void {}
  * </code>
  *

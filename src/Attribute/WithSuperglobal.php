@@ -19,7 +19,7 @@ use Attribute;
  * WithSuperglobal.
  *
  * Sets a single key of a PHP superglobal (one of $_SERVER, $_GET, $_POST,
- * $_ENV) before the test is prepared and restores the previous value
+ * $_ENV) before the test body runs (after setUp()) and restores the previous value
  * (including a previously unset key) afterwards. For actual
  * environment variables, prefer WithEnvVar, which also drives putenv().
  *

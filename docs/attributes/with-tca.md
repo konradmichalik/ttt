@@ -2,7 +2,7 @@
 
 _Scope: Class & Method level · Repeatable_
 
-Deep-merges the given configuration into `$GLOBALS['TCA'][$table]` before the test is prepared and guarantees a full restore afterwards, regardless of the test outcome. Class-level attributes are applied before method-level attributes; later attributes win on conflicting keys. Same merge and sentinel semantics as [`#[WithTypo3ConfVars]`](with-typo3-conf-vars.md): use `Typo3ConfVarsSentinel::Unset` to explicitly clear a key that would otherwise survive the merge.
+Deep-merges the given configuration into `$GLOBALS['TCA'][$table]` before the test body runs (after `setUp()`) and guarantees a full restore afterwards, regardless of the test outcome. Class-level attributes are applied before method-level attributes; later attributes win on conflicting keys. Same merge and sentinel semantics as [`#[WithTypo3ConfVars]`](with-typo3-conf-vars.md): use `Typo3ConfVarsSentinel::Unset` to explicitly clear a key that would otherwise survive the merge.
 
 ## Example
 

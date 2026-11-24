@@ -2,7 +2,7 @@
 
 _Scope: Class & Method level · Repeatable_
 
-Sets a single key of a PHP superglobal (`$_SERVER`, `$_GET`, `$_POST` or `$_ENV`) before the test is prepared and restores the previous value (including a previously unset key) afterwards. For actual environment variables, prefer [`#[WithEnvVar]`](with-env-var.md), which also drives `putenv()`.
+Sets a single key of a PHP superglobal (`$_SERVER`, `$_GET`, `$_POST` or `$_ENV`) before the test body runs (after `setUp()`) and restores the previous value (including a previously unset key) afterwards. For actual environment variables, prefer [`#[WithEnvVar]`](with-env-var.md), which also drives `putenv()`.
 
 ## Example
 

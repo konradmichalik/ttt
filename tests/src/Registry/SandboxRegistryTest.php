@@ -17,6 +17,7 @@ use Closure;
 use KonradMichalik\Ttt\Attribute\{TttAttribute, WithEnvVar, WithGlobal, WithTypo3ConfVars};
 use KonradMichalik\Ttt\Handler\{ConfVarsHandler, EnvVarHandler};
 use KonradMichalik\Ttt\Registry\SandboxRegistry;
+use LogicException;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -147,6 +148,17 @@ final class SandboxRegistryTest extends TestCase
 
         self::assertArrayNotHasKey('TYPO3_CONF_VARS', $GLOBALS);
         $registry->restoreAll();
+    }
+
+    #[Test]
+    public function failsWhenNoHandlerSupportsAnAttribute(): void
+    {
+        $registry = new SandboxRegistry([new ConfVarsHandler()]);
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage(WithEnvVar::class);
+
+        $registry->applyFor(PlainFixture::class, 'annotatedMethod');
     }
 
     #[Test]

@@ -2,7 +2,7 @@
 
 _Scope: Class & Method level · Repeatable_
 
-Deep-merges the given configuration into `$GLOBALS['TYPO3_CONF_VARS']` before the test is prepared and guarantees a full restore afterwards, regardless of the test outcome. Class-level attributes are applied before method-level attributes; later attributes win on conflicting keys.
+Deep-merges the given configuration into `$GLOBALS['TYPO3_CONF_VARS']` before the test body runs (after `setUp()`) and guarantees a full restore afterwards, regardless of the test outcome. Class-level attributes are applied before method-level attributes; later attributes win on conflicting keys.
 
 ## Example
 

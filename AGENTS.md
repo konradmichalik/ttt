@@ -20,7 +20,7 @@ src/
   Attribute/     Readonly DTOs implementing TttAttribute
   Handler/       AttributeHandler implementations, one per attribute
   Registry/      SandboxRegistry: reads attributes, applies handlers, restores LIFO
-  Subscriber/    PHPUnit event subscribers (apply before setUp, restore after test)
+  Subscriber/    PHPUnit event subscribers (apply on Test\Prepared after setUp, restore after test)
   Http/          Fluent builder for TYPO3 ServerRequest objects
   Assertion/     JsonAssertions trait
   Contract/      ConfigurationValidationContract abstract test case
@@ -38,7 +38,7 @@ The sandbox mechanism has three layers:
 2. Handlers are stateless. `apply()` snapshots state, mutates it and returns a closure that restores the snapshot.
 3. `SandboxRegistry` collects class-level then method-level attributes, runs the matching handlers and restores in reverse order. It continues if a restorer throws and rethrows only the first failure.
 
-`TttExtension::bootstrap()` builds the registry and registers `ApplySandboxSubscriber` (on `PreparationStarted`) and `RestoreSandboxSubscriber` (on `Test\Finished`). `phpunit.xml` registers `TttExtension` so the project's own tests use its attributes.
+`TttExtension::bootstrap()` builds the registry and registers `ApplySandboxSubscriber` (on `Test\Prepared`, after `setUp()`) and `RestoreSandboxSubscriber` (on `Test\Finished`). `phpunit.xml` registers `TttExtension` so the project's own tests use its attributes.
 
 Adding an attribute:
 1. Add a readonly DTO in `src/Attribute/` implementing `TttAttribute`.

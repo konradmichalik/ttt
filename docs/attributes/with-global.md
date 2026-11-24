@@ -2,14 +2,16 @@
 
 _Scope: Class & Method level · Repeatable_
 
-Sets an arbitrary `$GLOBALS` entry before the test is prepared and restores the previous value (including a previously unset key) afterwards. For `$GLOBALS['TYPO3_CONF_VARS']` specifically, prefer [`#[WithTypo3ConfVars]`](with-typo3-conf-vars.md), which deep-merges instead of overwriting.
+Sets an arbitrary `$GLOBALS` entry before the test body runs (after `setUp()`) and restores the previous value (including a previously unset key) afterwards. For `$GLOBALS['TYPO3_CONF_VARS']` specifically, prefer [`#[WithTypo3ConfVars]`](with-typo3-conf-vars.md), which deep-merges instead of overwriting.
 
 ## Example
 
 ```php
-#[WithGlobal('TYPO3_REQUEST', $request)]
-public function resolvesFromCurrentRequest(): void {}
+#[WithGlobal('MY_APP_SETTINGS', ['mode' => 'strict'])]
+public function behavesInStrictMode(): void {}
 ```
+
+Attribute arguments must be constant expressions: scalars, arrays and `new` expressions such as `new ServerRequest('https://example.com/')` work, a prepared variable or a mock does not.
 
 <details>
 <summary>More examples</summary>
@@ -17,9 +19,9 @@ public function resolvesFromCurrentRequest(): void {}
 ### Repeatable across multiple keys
 
 ```php
-#[WithGlobal('TYPO3_REQUEST', $request)]
-#[WithGlobal('TSFE', $frontendController)]
-public function resolvesFromCurrentRequestAndFrontendController(): void {}
+#[WithGlobal('TYPO3_REQUEST', new ServerRequest('https://example.com/'))]
+#[WithGlobal('MY_APP_SETTINGS', ['mode' => 'strict'])]
+public function resolvesFromCurrentRequestInStrictMode(): void {}
 ```
 
 ### Restoring a previously unset key
@@ -57,7 +59,7 @@ protected function tearDown(): void
 use KonradMichalik\Ttt\Attribute\WithGlobal;
 
 #[Test]
-#[WithGlobal('TYPO3_REQUEST', $request)]
+#[WithGlobal('TYPO3_REQUEST', new ServerRequest('https://example.com/'))]
 public function resolvesFromCurrentRequest(): void {}
 ```
 

@@ -26,10 +26,10 @@ use function is_int;
 use function is_scalar;
 use function is_string;
 use function max;
-use function mb_substr;
 use function min;
 use function sprintf;
 use function str_contains;
+use function substr;
 use function time;
 
 /**
@@ -122,7 +122,7 @@ final class TcaDefaults
         $value = is_string($value) ? $value : '';
         $max = $config['max'] ?? null;
 
-        return is_int($max) && $max > 0 ? mb_substr($value, 0, $max) : $value;
+        return is_int($max) && $max > 0 ? substr($value, 0, $max) : $value;
     }
 
     /**

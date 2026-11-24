@@ -19,6 +19,8 @@ use KonradMichalik\Ttt\Factory\TcaDefaults;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 
+use function strlen;
+
 /**
  * TcaDefaultsTest.
  *
@@ -55,7 +57,7 @@ final class TcaDefaultsTest extends TestCase
     {
         $row = TcaDefaults::for('tx_ttt_defaults', self::seededFaker());
 
-        self::assertLessThanOrEqual(5, mb_strlen($row['limited']));
+        self::assertLessThanOrEqual(5, strlen($row['limited']));
         self::assertIsInt($row['counter']);
         self::assertStringContainsString('@', $row['mail']);
         self::assertStringStartsWith('http', $row['url']);

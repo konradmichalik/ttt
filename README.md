@@ -120,6 +120,7 @@ public function showsMaintenanceButton(WithBackendUser $user, bool $expected): v
 | [Request kit](docs/kits/request.md) | Fluent builder for TYPO3 `ServerRequest` objects |
 | [Assertion kit](docs/kits/assertion.md) | JSON path assertions with descriptive failure messages |
 | [Contract kit](docs/kits/contract.md) | Generates violation-case tests from a `validateConfiguration()`-style contract |
+| [Factory kit](docs/kits/factory.md) | TCA-aware record factories for functional tests, plus `#[WithRecords]` |
 | [Fixture kit](docs/kits/fixture.md) | Disposable test fixtures (images, log files, JSON responses) |
 
 The optional [PHPStan rule](docs/phpstan-rule.md) points direct global state changes in tests to the matching attribute.

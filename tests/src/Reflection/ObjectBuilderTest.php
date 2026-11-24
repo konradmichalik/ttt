@@ -16,6 +16,7 @@ namespace KonradMichalik\Ttt\Tests\Reflection;
 use KonradMichalik\Ttt\Reflection\ObjectBuilder;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
 use ReflectionProperty;
 use stdClass;
 
@@ -74,7 +75,56 @@ final class ObjectBuilderTest extends TestCase
         self::assertNotSame($first, $second);
         self::assertSame('shared', $second->getName());
     }
+
+    #[Test]
+    public function setsPrivatePropertiesOfParentClasses(): void
+    {
+        $dependency = new stdClass();
+
+        $instance = ObjectBuilder::withoutConstructor(ObjectBuilderChildFixture::class)
+            ->withProperty('dependency', $dependency)
+            ->build();
+
+        self::assertSame($dependency, $instance->dependency());
+    }
+
+    #[Test]
+    public function namesTheWholeHierarchyWhenThePropertyDoesNotExist(): void
+    {
+        $this->expectException(ReflectionException::class);
+        $this->expectExceptionMessage(ObjectBuilderChildFixture::class.' > '.ObjectBuilderParentFixture::class);
+
+        ObjectBuilder::withoutConstructor(ObjectBuilderChildFixture::class)
+            ->withProperty('missing', 1)
+            ->build();
+    }
 }
+
+/**
+ * ObjectBuilderParentFixture.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-3.0-or-later
+ */
+abstract class ObjectBuilderParentFixture
+{
+    // Written through reflection by ObjectBuilder only.
+    // @phpstan-ignore property.onlyRead
+    private stdClass $dependency;
+
+    public function dependency(): stdClass
+    {
+        return $this->dependency;
+    }
+}
+
+/**
+ * ObjectBuilderChildFixture.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-3.0-or-later
+ */
+final class ObjectBuilderChildFixture extends ObjectBuilderParentFixture {}
 
 /**
  * ObjectBuilderFixture.

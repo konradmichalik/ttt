@@ -77,7 +77,9 @@ final class EnvironmentHandler implements AttributeHandler
             $createdPath = $projectPath;
         }
 
-        $projectPath ??= sys_get_temp_dir();
+        if (null === $projectPath) {
+            throw new RuntimeException('WithEnvironment needs a "projectPath" when "temporaryProjectPath" is false. The shared system temp directory is never used as project root.', 1752561605);
+        }
 
         if (null !== $createdPath && (is_dir($createdPath) || is_link($createdPath))) {
             // Fail closed instead of adopting a path we did not create (symlink/pre-creation race).
@@ -106,11 +108,13 @@ final class EnvironmentHandler implements AttributeHandler
         );
 
         return static function () use ($snapshot, $createdPath): void {
-            if (null !== $createdPath) {
-                self::removeDirectory($createdPath);
+            try {
+                if (null !== $createdPath) {
+                    self::removeDirectory($createdPath);
+                }
+            } finally {
+                self::restore($snapshot);
             }
-
-            self::restore($snapshot);
         };
     }
 

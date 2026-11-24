@@ -8,7 +8,7 @@ Guidance for coding agents working in this repository.
 
 It is a standalone Composer library, not a TYPO3 extension.
 
-- PHP: `~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0`
+- PHP: `~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0 || ~8.6.0`
 - PHPUnit: `^10.5 || ^11.0 || ^12.0 || ^13.0`
 - TYPO3: `typo3/cms-core` and `typo3/cms-frontend` (`^13.4 || ^14.0`) are `suggest` and `require-dev` only. TYPO3-specific attributes need them.
 - License: GPL-3.0-or-later
@@ -65,7 +65,7 @@ composer test:coverage     # PHPUnit with coverage (XDEBUG_MODE=coverage)
 - Use PHPUnit attributes (`#[Test]`, `#[CoversClass(...)]`), not `test`-prefixed method names.
 - Single test: `vendor/bin/phpunit -c phpunit.xml --filter testMethodName tests/src/Handler/ConfVarsHandlerTest.php`
 - Coverage reports are written to `.build/coverage/` (`clover.xml`, `html/`, `junit.xml`).
-- CI runs the tests through a reusable workflow on PHP 8.2 to 8.5 with highest and lowest dependencies.
+- CI runs the tests through a reusable workflow on PHP 8.2 to 8.6 with highest and lowest dependencies.
 
 ## Code style and static analysis
 

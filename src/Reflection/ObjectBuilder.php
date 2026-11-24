@@ -14,7 +14,11 @@ declare(strict_types=1);
 namespace KonradMichalik\Ttt\Reflection;
 
 use ReflectionClass;
+use ReflectionException;
 use ReflectionProperty;
+
+use function implode;
+use function sprintf;
 
 /**
  * ObjectBuilder.
@@ -78,9 +82,30 @@ final class ObjectBuilder
         $instance = (new ReflectionClass($this->className))->newInstanceWithoutConstructor();
 
         foreach ($this->properties as $name => $value) {
-            (new ReflectionProperty($this->className, $name))->setValue($instance, $value);
+            $this->findProperty($name)->setValue($instance, $value);
         }
 
         return $instance;
+    }
+
+    /**
+     * Private properties of parent classes are invisible to the child's
+     * ReflectionClass, so the hierarchy is walked until a class declares it.
+     */
+    private function findProperty(string $name): ReflectionProperty
+    {
+        $hierarchy = [];
+        $class = new ReflectionClass($this->className);
+
+        while (false !== $class) {
+            if ($class->hasProperty($name)) {
+                return $class->getProperty($name);
+            }
+
+            $hierarchy[] = $class->getName();
+            $class = $class->getParentClass();
+        }
+
+        throw new ReflectionException(sprintf('Property $%s does not exist in %s.', $name, implode(' > ', $hierarchy)), 1752561608);
     }
 }

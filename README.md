@@ -70,7 +70,7 @@ Register the extension once in your `phpunit.xml`:
 </extensions>
 ```
 
-That's it: all *ttt* attributes now work in every test. Attributes can be placed on classes and methods (class level is applied first, method level merges on top) and are repeatable.
+That's it: all *ttt* attributes now work in every test. Attributes can be placed on classes and methods (class level is applied first, including attributes of parent classes, method level merges on top) and are repeatable.
 
 ### Available attributes
 

@@ -51,6 +51,7 @@ final class CacheHandler implements AttributeHandler
     {
         assert($attribute instanceof WithCache);
 
+        $dropCacheManagerIfCreated = SingletonCleanup::track(CacheManager::class);
         $cacheManager = GeneralUtility::makeInstance(CacheManager::class);
 
         $configurationsProperty = new ReflectionProperty(CacheManager::class, 'cacheConfigurations');
@@ -72,10 +73,11 @@ final class CacheHandler implements AttributeHandler
         unset($caches[$attribute->identifier]);
         $cachesProperty->setValue($cacheManager, $caches);
 
-        return static function () use ($cacheManager, $configurationsProperty, $cachesProperty, $cacheGroupsProperty, $configurationsBefore, $cachesBefore, $cacheGroupsBefore): void {
+        return static function () use ($cacheManager, $configurationsProperty, $cachesProperty, $cacheGroupsProperty, $configurationsBefore, $cachesBefore, $cacheGroupsBefore, $dropCacheManagerIfCreated): void {
             $configurationsProperty->setValue($cacheManager, $configurationsBefore);
             $cachesProperty->setValue($cacheManager, $cachesBefore);
             $cacheGroupsProperty->setValue($cacheManager, $cacheGroupsBefore);
+            $dropCacheManagerIfCreated();
         };
     }
 }

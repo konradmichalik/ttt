@@ -57,10 +57,11 @@ final class FrontendUserHandler implements AttributeHandler
 
         $GLOBALS['FE_USER'] = $user;
 
+        $dropContextIfCreated = SingletonCleanup::track(Context::class);
         $context = GeneralUtility::makeInstance(Context::class);
         $restoreAspect = ContextAspectSandbox::apply($context, 'frontend.user', new UserAspect($user, $attribute->groups));
 
-        return static function () use ($existedGlobal, $previousGlobal, $restoreAspect): void {
+        return static function () use ($existedGlobal, $previousGlobal, $restoreAspect, $dropContextIfCreated): void {
             if ($existedGlobal) {
                 $GLOBALS['FE_USER'] = $previousGlobal;
             } else {
@@ -68,6 +69,7 @@ final class FrontendUserHandler implements AttributeHandler
             }
 
             $restoreAspect();
+            $dropContextIfCreated();
         };
     }
 }

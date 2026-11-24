@@ -14,12 +14,13 @@ declare(strict_types=1);
 namespace KonradMichalik\Ttt\Tests\Registry;
 
 use Closure;
-use KonradMichalik\Ttt\Attribute\{WithEnvVar, WithTypo3ConfVars};
+use KonradMichalik\Ttt\Attribute\{TttAttribute, WithEnvVar, WithGlobal, WithTypo3ConfVars};
 use KonradMichalik\Ttt\Handler\{ConfVarsHandler, EnvVarHandler};
 use KonradMichalik\Ttt\Registry\SandboxRegistry;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use stdClass;
 
 /**
  * SandboxRegistryTest.
@@ -111,6 +112,28 @@ final class SandboxRegistryTest extends TestCase
     }
 
     #[Test]
+    public function createsFreshAttributeInstancesForEveryApplication(): void
+    {
+        $seen = [];
+        $registry = new SandboxRegistry([
+            new CallbackHandler(static fn () => null, static function (TttAttribute $attribute) use (&$seen): void {
+                $seen[] = $attribute;
+            }),
+        ]);
+
+        $registry->applyFor(ObjectArgumentFixture::class, 'method');
+        $registry->restoreAll();
+        $registry->applyFor(ObjectArgumentFixture::class, 'method');
+        $registry->restoreAll();
+
+        self::assertCount(2, $seen);
+        self::assertInstanceOf(WithGlobal::class, $seen[0]);
+        self::assertInstanceOf(WithGlobal::class, $seen[1]);
+        self::assertNotSame($seen[0], $seen[1]);
+        self::assertNotSame($seen[0]->value, $seen[1]->value);
+    }
+
+    #[Test]
     public function restoreAllRunsEveryRestorerEvenIfOneThrows(): void
     {
         $order = [];
@@ -166,6 +189,18 @@ final class PlainFixture
 }
 
 /**
+ * ObjectArgumentFixture.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-3.0-or-later
+ */
+final class ObjectArgumentFixture
+{
+    #[WithGlobal('ttt_shared', new stdClass())]
+    public function method(): void {}
+}
+
+/**
  * CallbackHandler.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
@@ -173,17 +208,25 @@ final class PlainFixture
  */
 final readonly class CallbackHandler implements \KonradMichalik\Ttt\Handler\AttributeHandler
 {
+    /**
+     * @param (Closure(TttAttribute): void)|null $onApply
+     */
     public function __construct(
         private Closure $restorer,
+        private ?Closure $onApply = null,
     ) {}
 
-    public function supports(\KonradMichalik\Ttt\Attribute\TttAttribute $attribute): bool
+    public function supports(TttAttribute $attribute): bool
     {
         return true;
     }
 
-    public function apply(\KonradMichalik\Ttt\Attribute\TttAttribute $attribute): Closure
+    public function apply(TttAttribute $attribute): Closure
     {
+        if (null !== $this->onApply) {
+            ($this->onApply)($attribute);
+        }
+
         return $this->restorer;
     }
 }

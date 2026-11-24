@@ -6,7 +6,7 @@
 - [Why an extension instead of `tearDown()`?](why-extension.md): why restoration is driven by PHPUnit's event system instead of hand-written cleanup
 - [Why not `#[BackupGlobals]`?](why-not-backupglobals.md): how Terrarium's per-attribute sandboxing differs from PHPUnit's built-in globals backup
 - [Without the extension](without-extension.md): imperative traits for mid-test state changes
-- [PHPStan rule](phpstan-rule.md): points direct global state changes in tests to the matching attribute
+- [PHPStan rules](phpstan-rule.md): the separate `ttt-phpstan` package points hand-written test state to the matching attribute
 
 ## Attributes
 

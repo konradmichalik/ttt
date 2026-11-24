@@ -16,13 +16,15 @@ namespace KonradMichalik\Ttt\Traits;
 use Closure;
 use KonradMichalik\Ttt\Attribute\WithEnvVar;
 use KonradMichalik\Ttt\Handler\EnvVarHandler;
+use PHPUnit\Framework\Attributes\After;
 
 /**
  * EnvVarSandbox.
  *
  * Imperative alternative to the WithEnvVar attribute for tests that need to
  * manipulate environment variables mid-test or do not run with the
- * TttExtension enabled. Call restoreEnvVars() in tearDown().
+ * TttExtension enabled. restoreEnvVars() runs automatically after each test
+ * through PHPUnit's #[After] hook and can also be called earlier.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-3.0-or-later
@@ -32,13 +34,14 @@ trait EnvVarSandbox
     /** @var list<Closure(): void> */
     private array $envVarRestorers = [];
 
-    protected function setEnvVar(string $name, string $value): void
+    protected function setEnvVar(string $name, ?string $value): void
     {
         $this->envVarRestorers[] = (new EnvVarHandler())->apply(
             new WithEnvVar($name, $value),
         );
     }
 
+    #[After]
     protected function restoreEnvVars(): void
     {
         while ([] !== $this->envVarRestorers) {

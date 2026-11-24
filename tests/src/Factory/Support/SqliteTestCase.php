@@ -114,7 +114,7 @@ abstract class SqliteTestCase extends TestCase
     {
         return [
             'CREATE TABLE pages (uid INTEGER PRIMARY KEY AUTOINCREMENT, pid INTEGER DEFAULT 0, title TEXT, crdate INTEGER DEFAULT 0, tstamp INTEGER DEFAULT 0, hidden INTEGER DEFAULT 0, sys_language_uid INTEGER DEFAULT 0, l10n_parent INTEGER DEFAULT 0)',
-            'CREATE TABLE tx_news (uid INTEGER PRIMARY KEY AUTOINCREMENT, pid INTEGER DEFAULT 0, title TEXT, teaser TEXT, datetime INTEGER DEFAULT 0, hidden INTEGER DEFAULT 0, type TEXT, priority INTEGER DEFAULT 0, categories INTEGER DEFAULT 0, comments INTEGER DEFAULT 0, related TEXT, discussion INTEGER DEFAULT 0, main_category INTEGER DEFAULT 0, topics INTEGER DEFAULT 0, attachments INTEGER DEFAULT 0, crdate INTEGER DEFAULT 0, tstamp INTEGER DEFAULT 0, sys_language_uid INTEGER DEFAULT 0, l10n_parent INTEGER DEFAULT 0)',
+            'CREATE TABLE tx_news (uid INTEGER PRIMARY KEY AUTOINCREMENT, pid INTEGER DEFAULT 0, title TEXT, teaser TEXT, datetime INTEGER DEFAULT 0, hidden INTEGER DEFAULT 0, type TEXT, priority INTEGER DEFAULT 0, categories INTEGER DEFAULT 0, comments INTEGER DEFAULT 0, related TEXT, mixed TEXT, discussion INTEGER DEFAULT 0, main_category INTEGER DEFAULT 0, topics INTEGER DEFAULT 0, attachments INTEGER DEFAULT 0, crdate INTEGER DEFAULT 0, tstamp INTEGER DEFAULT 0, sys_language_uid INTEGER DEFAULT 0, l10n_parent INTEGER DEFAULT 0)',
             'CREATE TABLE tx_news_comment (uid INTEGER PRIMARY KEY AUTOINCREMENT, pid INTEGER DEFAULT 0, news INTEGER DEFAULT 0, message TEXT, sorting INTEGER DEFAULT 0, parenttable TEXT)',
             'CREATE TABLE sys_category (uid INTEGER PRIMARY KEY AUTOINCREMENT, pid INTEGER DEFAULT 0, title TEXT)',
             'CREATE TABLE sys_category_record_mm (uid_local INTEGER, uid_foreign INTEGER, tablenames TEXT, fieldname TEXT, sorting INTEGER DEFAULT 0, sorting_foreign INTEGER DEFAULT 0)',
@@ -143,6 +143,7 @@ abstract class SqliteTestCase extends TestCase
                     'type' => ['config' => ['type' => 'select', 'items' => [['label' => 'Default', 'value' => 'default'], ['label' => 'Other', 'value' => 'other']]]],
                     'priority' => ['config' => ['type' => 'number', 'range' => ['lower' => 1, 'upper' => 5]]],
                     'categories' => ['config' => ['type' => 'category', 'MM' => 'sys_category_record_mm', 'foreign_table' => 'sys_category']],
+                    'mixed' => ['config' => ['type' => 'group', 'allowed' => 'tx_news_comment,sys_category']],
                     'comments' => ['config' => ['type' => 'inline', 'foreign_table' => 'tx_news_comment', 'foreign_field' => 'news', 'foreign_sortby' => 'sorting']],
                     'attachments' => ['config' => ['type' => 'inline', 'foreign_table' => 'tx_news_comment', 'foreign_field' => 'news', 'foreign_table_field' => 'parenttable']],
                     'discussion' => ['config' => ['type' => 'inline', 'foreign_table' => 'tx_news_comment', 'foreign_field' => 'news', 'foreign_match_fields' => ['parenttable' => 'discussion']]],

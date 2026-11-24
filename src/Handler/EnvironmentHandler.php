@@ -89,10 +89,19 @@ final class EnvironmentHandler implements AttributeHandler
             // @codeCoverageIgnoreEnd
         }
 
-        foreach (['', '/public', '/var', '/config'] as $directory) {
-            if (!is_dir($projectPath.$directory) && !@mkdir($projectPath.$directory, 0o700, true) && !is_dir($projectPath.$directory)) {
-                throw new RuntimeException(sprintf('Unable to create directory "%s".', $projectPath.$directory), 1752561604);
+        try {
+            foreach (['', '/public', '/var', '/config'] as $directory) {
+                if (!is_dir($projectPath.$directory) && !@mkdir($projectPath.$directory, 0o700, true) && !is_dir($projectPath.$directory)) {
+                    throw new RuntimeException(sprintf('Unable to create directory "%s".', $projectPath.$directory), 1752561604);
+                }
             }
+        } catch (RuntimeException $exception) {
+            // The restorer is never returned, so a half created temp root would stay behind.
+            if (null !== $createdPath) {
+                self::removeDirectory($createdPath);
+            }
+
+            throw $exception;
         }
 
         Environment::initialize(

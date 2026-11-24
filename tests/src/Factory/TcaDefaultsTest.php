@@ -45,6 +45,8 @@ final class TcaDefaultsTest extends TestCase
         'moment' => ['config' => ['type' => 'datetime', 'dbType' => 'datetime']],
         'clock' => ['config' => ['type' => 'datetime', 'dbType' => 'time']],
         'mode' => ['config' => ['type' => 'radio', 'items' => [['label' => 'A', 'value' => 3]]]],
+        'divided' => ['config' => ['type' => 'select', 'items' => [['label' => '-', 'value' => '--div--'], ['label' => 'A', 'value' => 'a']]]],
+        'onlyDivider' => ['config' => ['type' => 'select', 'items' => [['label' => '-', 'value' => '--div--']]]],
         'legacy' => ['config' => ['type' => 'select', 'items' => [['Label', 'first']]]],
         'related' => ['config' => ['type' => 'select', 'foreign_table' => 'pages', 'items' => [['label' => 'x', 'value' => 1]]]],
         'flag' => ['config' => ['type' => 'check', 'default' => 1]],
@@ -75,6 +77,8 @@ final class TcaDefaultsTest extends TestCase
         self::assertMatchesRegularExpression('/^\d{2}:\d{2}:\d{2}$/', $row['clock']);
         self::assertSame(3, $row['mode']);
         self::assertSame('first', $row['legacy']);
+        self::assertSame('a', $row['divided']);
+        self::assertArrayNotHasKey('onlyDivider', $row);
         self::assertArrayNotHasKey('related', $row);
         self::assertSame(1, $row['flag']);
         self::assertSame('fixed', $row['label']);

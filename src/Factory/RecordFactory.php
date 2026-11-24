@@ -27,6 +27,7 @@ use function is_array;
 use function is_int;
 use function is_string;
 use function sprintf;
+use function str_contains;
 
 /**
  * RecordFactory.
@@ -53,6 +54,10 @@ use function sprintf;
 abstract class RecordFactory
 {
     protected string $table = '';
+    /** @var array<string, Generator> */
+    private static array $generators = [];
+
+    private static ?string $generatorsFor = null;
 
     private int $count = 1;
 
@@ -94,6 +99,7 @@ abstract class RecordFactory
 
     /**
      * Creates the parent first and stores its uid in the given field (for example "pid").
+     * All records of one create() run share that parent.
      */
     public function for(self $parent, string $field): static
     {
@@ -180,22 +186,26 @@ abstract class RecordFactory
     {
         $records = [];
 
-        foreach ($this->make() as $row) {
-            $row = [...$row, ...$overrides];
+        // Once per run, so that count(3) children share one parent.
+        $parentUids = [];
 
-            foreach ($this->parents as [$parent, $field]) {
-                $row[$field] = $parent->persist($log)[0]->uid ?? throw new LogicException(sprintf('The parent factory for "%s" created no record.', $field), 1753900704);
-            }
+        foreach ($this->parents as [$parent, $field]) {
+            $parentUids[$field] = $parent->persist($log)[0]->uid ?? throw new LogicException(sprintf('The parent factory for "%s" created no record.', $field), 1753900704);
+        }
+
+        foreach ($this->make() as $row) {
+            $row = [...$row, ...$overrides, ...$parentUids];
 
             $uid = $this->insert($row, $log);
             $translations = [];
+            $base = $row;
 
             foreach ($this->children as [$child, $field]) {
                 $row = [...$row, ...$this->attachChildren($uid, $field, $child, $log)];
             }
 
             foreach ($this->translations as [$languageUid, $translationOverrides]) {
-                $translations[] = $this->createTranslation($row, $uid, $languageUid, $translationOverrides, $log);
+                $translations[] = $this->createTranslation($base, $uid, $languageUid, $translationOverrides, $log);
             }
 
             $records[] = new Record($this->table(), $uid, $row, $translations);
@@ -272,8 +282,10 @@ abstract class RecordFactory
 
         if (in_array($type, ['select', 'group', 'inline', 'category'], true)) {
             $children = $child->persist($log);
+            // A group over several tables needs "table_uid", a bare uid would point to the first table.
+            $prefixed = 'group' === $type && is_string($config['allowed'] ?? null) && str_contains($config['allowed'], ',');
 
-            return $this->updateField($uid, $field, implode(',', array_map(static fn (Record $record): int => $record->uid, $children)));
+            return $this->updateField($uid, $field, implode(',', array_map(static fn (Record $record): int|string => $prefixed ? $record->table.'_'.$record->uid : $record->uid, $children)));
         }
 
         throw new LogicException(sprintf('Field "%s" of table "%s" has the type "%s", which cannot hold child records.', $field, $this->table(), $type), 1753900707);
@@ -371,9 +383,18 @@ abstract class RecordFactory
         $testId = null === $test ? '' : $test::class.'::'.$test->name().'#'.$test->dataName();
         // @codeCoverageIgnoreEnd
 
-        $faker = FakerFactory::create();
-        $faker->seed(crc32($testId.'|'.$this->table));
+        // One generator per test and table, shared by all runs: separate runs must not repeat each other's values.
+        if (self::$generatorsFor !== $testId) {
+            self::$generators = [];
+            self::$generatorsFor = $testId;
+        }
 
-        return $faker;
+        if (!isset(self::$generators[$this->table])) {
+            $faker = FakerFactory::create();
+            $faker->seed(crc32($testId.'|'.$this->table));
+            self::$generators[$this->table] = $faker;
+        }
+
+        return self::$generators[$this->table];
     }
 }

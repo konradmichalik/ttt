@@ -168,9 +168,14 @@ final class TcaDefaults
             return null;
         }
 
-        $first = is_array($config['items'] ?? null) ? ($config['items'][0] ?? null) : null;
-        $value = is_array($first) ? ($first['value'] ?? $first[1] ?? null) : null;
+        foreach (is_array($config['items'] ?? null) ? $config['items'] : [] as $item) {
+            $value = is_array($item) ? ($item['value'] ?? $item[1] ?? null) : null;
 
-        return is_string($value) || is_int($value) ? $value : null;
+            if ((is_string($value) || is_int($value)) && '--div--' !== $value) {
+                return $value;
+            }
+        }
+
+        return null;
     }
 }

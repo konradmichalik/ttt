@@ -47,7 +47,7 @@ final class Records
             throw new LogicException(sprintf('No records of %s were created for this test. Add #[WithRecords(%s::class)] to the test.', $factory, $factory), 1753900710);
         }
 
-        return new RecordCollection(array_merge(...array_map(static fn (RecordCollection $collection): array => $collection->all(), $collections)));
+        return new RecordCollection(array_merge(...array_map(static fn (RecordCollection $collection): array => $collection->all(), $collections)), new CreationLog());
     }
 
     /**

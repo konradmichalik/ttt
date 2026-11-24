@@ -16,6 +16,7 @@ namespace KonradMichalik\Ttt\Registry;
 use Closure;
 use KonradMichalik\Ttt\Attribute\TttAttribute;
 use KonradMichalik\Ttt\Handler\AttributeHandler;
+use LogicException;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionMethod;
@@ -24,6 +25,7 @@ use Throwable;
 use function array_map;
 use function array_merge;
 use function array_pop;
+use function sprintf;
 
 /**
  * SandboxRegistry.
@@ -63,7 +65,8 @@ final class SandboxRegistry
      * @param class-string       $className
      * @param list<TttAttribute> $dataSetAttributes applied last, so they take precedence
      *
-     * @throws Throwable The handler failure, after already applied attributes were rolled back
+     * @throws LogicException When an attribute has no handler
+     * @throws Throwable      The handler failure, after already applied attributes were rolled back
      */
     public function applyFor(string $className, string $methodName, array $dataSetAttributes = []): void
     {
@@ -74,10 +77,17 @@ final class SandboxRegistry
             );
 
             foreach ([...$attributes, ...$dataSetAttributes] as $attribute) {
+                $handled = false;
+
                 foreach ($this->handlers as $handler) {
                     if ($handler->supports($attribute)) {
+                        $handled = true;
                         $this->restorers[] = $handler->apply($attribute);
                     }
+                }
+
+                if (!$handled) {
+                    throw new LogicException(sprintf('No handler supports the attribute "%s". Register a handler for it via the "handlers" parameter of the Terrarium extension.', $attribute::class), 1752561602);
                 }
             }
         } catch (Throwable $throwable) {

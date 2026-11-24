@@ -60,6 +60,7 @@ final class FreezeTimeHandler implements AttributeHandler
             $globalsSnapshot[$name] = array_key_exists($name, $GLOBALS) ? $GLOBALS[$name] : null;
         }
 
+        $dropContextIfCreated = SingletonCleanup::track(Context::class);
         $existedContext = array_key_exists(Context::class, GeneralUtility::getSingletonInstances());
         $context = GeneralUtility::makeInstance(Context::class);
 
@@ -78,7 +79,7 @@ final class FreezeTimeHandler implements AttributeHandler
         $GLOBALS['ACCESS_TIME'] = $timestamp - ($timestamp % 60);
         $GLOBALS['SIM_ACCESS_TIME'] = $timestamp - ($timestamp % 60);
 
-        return static function () use ($globalsSnapshot, $context, $existedContext, $previousDateAspect): void {
+        return static function () use ($globalsSnapshot, $context, $existedContext, $previousDateAspect, $dropContextIfCreated): void {
             foreach ($globalsSnapshot as $name => $value) {
                 if (null === $value) {
                     unset($GLOBALS[$name]);
@@ -88,9 +89,7 @@ final class FreezeTimeHandler implements AttributeHandler
             }
 
             if (!$existedContext) {
-                $singletons = GeneralUtility::getSingletonInstances();
-                unset($singletons[Context::class]);
-                GeneralUtility::resetSingletonInstances($singletons);
+                $dropContextIfCreated();
 
                 return;
             }

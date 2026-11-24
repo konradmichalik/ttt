@@ -98,9 +98,18 @@ final class RecordsHandlerTest extends SqliteTestCase
     public function failsForAnUnknownState(): void
     {
         $this->expectException(LogicException::class);
-        $this->expectExceptionMessage('no state method "nonsense"');
+        $this->expectExceptionMessage('no public state method "nonsense"');
 
         (new RecordsHandler())->apply(new WithRecords(NewsFactory::class, states: ['nonsense']));
+    }
+
+    #[Test]
+    public function failsForAStateThatIsOnlyABaseClassMethod(): void
+    {
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessage('no public state method "create"');
+
+        (new RecordsHandler())->apply(new WithRecords(NewsFactory::class, states: ['create']));
     }
 
     #[Test]

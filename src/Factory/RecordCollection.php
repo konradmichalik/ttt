@@ -39,7 +39,7 @@ final readonly class RecordCollection implements Countable, IteratorAggregate
      */
     public function __construct(
         private array $records,
-        private CreationLog $log = new CreationLog(),
+        private CreationLog $log,
     ) {}
 
     public function first(): Record

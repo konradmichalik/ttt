@@ -17,10 +17,11 @@ use Closure;
 use KonradMichalik\Ttt\Attribute\{TttAttribute, WithRecords};
 use KonradMichalik\Ttt\Factory\{RecordFactory, Records};
 use LogicException;
+use ReflectionMethod;
 
 use function assert;
+use function is_callable;
 use function is_subclass_of;
-use function method_exists;
 use function sprintf;
 
 /**
@@ -51,8 +52,8 @@ final class RecordsHandler implements AttributeHandler
         $factory = ($attribute->factory)::new()->count($attribute->count);
 
         foreach ($attribute->states as $state) {
-            if (!method_exists($factory, $state)) {
-                throw new LogicException(sprintf('%s has no state method "%s".', $attribute->factory, $state), 1753900712);
+            if (!is_callable([$factory, $state]) || RecordFactory::class === (new ReflectionMethod($factory, $state))->getDeclaringClass()->getName()) {
+                throw new LogicException(sprintf('%s has no public state method "%s".', $attribute->factory, $state), 1753900712);
             }
 
             $factory = $factory->{$state}();

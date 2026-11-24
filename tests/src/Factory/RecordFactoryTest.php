@@ -17,6 +17,7 @@ use KonradMichalik\Ttt\Factory\{CreationLog, Record, RecordCollection, RecordFac
 use KonradMichalik\Ttt\Tests\Factory\Support\{CategoryFactory, CommentFactory, NewsFactory, NoTableFactory, PageFactory, SqliteTestCase};
 use LogicException;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
+use ReflectionProperty;
 use RuntimeException;
 
 /**
@@ -90,9 +91,23 @@ final class RecordFactoryTest extends SqliteTestCase
     }
 
     #[Test]
-    public function theSameTestProducesTheSameData(): void
+    public function separateRunsDoNotRepeatEachOthersValues(): void
     {
-        self::assertSame(NewsFactory::new()->make(), NewsFactory::new()->make());
+        $first = NewsFactory::new()->make()[0];
+        $second = NewsFactory::new()->make()[0];
+
+        self::assertNotSame($first['title'], $second['title']);
+    }
+
+    #[Test]
+    public function theSameTestProducesTheSameSequence(): void
+    {
+        $first = NewsFactory::new()->count(2)->make();
+
+        // Forget the shared generator, like the start of the same test in the next run.
+        (new ReflectionProperty(RecordFactory::class, 'generators'))->setValue(null, []);
+
+        self::assertSame($first, NewsFactory::new()->count(2)->make());
     }
 
     #[Test]
@@ -212,6 +227,42 @@ final class RecordFactoryTest extends SqliteTestCase
         self::assertSame(0, $this->countRows('pages'));
         self::assertSame(0, $this->countRows('tx_news'));
         self::assertSame(0, $this->countRows('tx_news_comment'));
+    }
+
+    #[Test]
+    public function booleanValuesAreStoredAsIntegers(): void
+    {
+        $record = NewsFactory::new()->state(['hidden' => true])->create()->first();
+        $visible = NewsFactory::new()->state(['hidden' => false])->create()->first();
+
+        self::assertSame(1, $this->fetchRow('tx_news', $record->uid)['hidden']);
+        self::assertSame(0, $this->fetchRow('tx_news', $visible->uid)['hidden']);
+    }
+
+    #[Test]
+    public function recordsOfOneRunShareTheirParent(): void
+    {
+        $news = NewsFactory::new()->count(3)->for(PageFactory::new(), 'pid')->create();
+
+        self::assertSame(1, $this->countRows('pages'));
+        self::assertSame([1], array_values(array_unique(array_map(static fn ($record) => $record->get('pid'), $news->all()))));
+    }
+
+    #[Test]
+    public function groupFieldsOverSeveralTablesStoreTableQualifiedUids(): void
+    {
+        $news = NewsFactory::new()->has(CommentFactory::new()->count(2), 'mixed')->create()->first();
+
+        self::assertSame('tx_news_comment_1,tx_news_comment_2', $this->fetchRow('tx_news', $news->uid)['mixed']);
+    }
+
+    #[Test]
+    public function translationsDoNotInheritTheRelationColumnsOfTheOriginal(): void
+    {
+        $news = NewsFactory::new()->has(CategoryFactory::new()->count(2), 'categories')->translated(1)->create()->first();
+
+        self::assertSame(2, $this->fetchRow('tx_news', $news->uid)['categories']);
+        self::assertSame(0, $this->fetchRow('tx_news', $news->translations[0]->uid)['categories']);
     }
 
     #[Test]

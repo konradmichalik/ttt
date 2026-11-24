@@ -22,6 +22,7 @@ use function array_map;
 use function array_values;
 use function implode;
 use function is_array;
+use function is_bool;
 use function sprintf;
 
 /**
@@ -65,7 +66,7 @@ final class RecordPersister
 
         $connection->executeStatement(
             sprintf('INSERT INTO %s (%s) VALUES (%s)', $connection->quoteIdentifier($table), $columns, $placeholders),
-            array_values($row),
+            self::bindable($row),
         );
     }
 
@@ -79,7 +80,7 @@ final class RecordPersister
 
         $connection->executeStatement(
             sprintf('UPDATE %s SET %s WHERE %s = ?', $connection->quoteIdentifier($table), $assignments, $connection->quoteIdentifier('uid')),
-            [...array_values($values), $uid],
+            [...self::bindable($values), $uid],
         );
     }
 
@@ -95,6 +96,18 @@ final class RecordPersister
             sprintf('DELETE FROM %s WHERE %s', $connection->quoteIdentifier($table), $conditions),
             array_values($where),
         );
+    }
+
+    /**
+     * Booleans would be bound as strings, and false as an empty one.
+     *
+     * @param array<string, mixed> $values
+     *
+     * @return list<mixed>
+     */
+    private static function bindable(array $values): array
+    {
+        return array_map(static fn (mixed $value): mixed => is_bool($value) ? (int) $value : $value, array_values($values));
     }
 
     private static function connection(string $table): Connection

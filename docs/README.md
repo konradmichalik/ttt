@@ -25,12 +25,14 @@
 - [`#[InLocale]`](attributes/in-locale.md): sets the locale for a given category
 - [`#[WithStaticProperty]`](attributes/with-static-property.md): generic escape hatch for sandboxing any static property via reflection
 - [`#[WithInstance]`](attributes/with-instance.md): queues a fake for the next `GeneralUtility::makeInstance()` call
+- [`#[WithRecords]`](attributes/with-records.md): creates records through a factory and deletes them after the test
 
 ## Kits
 
 - [Request kit](kits/request.md): fluent builder for TYPO3 `ServerRequest` objects
 - [Assertion kit](kits/assertion.md): dot-path based JSON assertions
 - [Contract kit](kits/contract.md): generates violation-case tests from a `validateConfiguration()`-style contract
+- [Factory kit](kits/factory.md): TCA-aware record factories and `#[WithRecords]` for functional tests
 - [Fixture kit](kits/fixture.md): disposable test fixtures (images, log files)
 - [Object builder](kits/object-builder.md): constructs an instance without calling its constructor, injecting properties via reflection
 

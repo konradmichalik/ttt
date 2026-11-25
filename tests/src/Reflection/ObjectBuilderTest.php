@@ -112,7 +112,7 @@ abstract class ObjectBuilderParentFixture
     // @phpstan-ignore property.uninitializedReadonly, property.onlyRead
     private readonly stdClass $dependency;
 
-    public function dependency(): stdClass
+    final public function dependency(): stdClass
     {
         return $this->dependency;
     }

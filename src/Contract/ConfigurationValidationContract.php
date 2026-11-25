@@ -70,13 +70,13 @@ abstract class ConfigurationValidationContract extends TestCase
     private const UNRECOGNIZED_ENUM_VALUE = '__ttt_unrecognized_enum_value__';
 
     #[Test]
-    public function validConfigurationIsAccepted(): void
+    final public function validConfigurationIsAccepted(): void
     {
         self::assertTrue($this->isValid($this->validConfiguration()));
     }
 
     #[Test]
-    public function generatedViolationsAreRejected(): void
+    final public function generatedViolationsAreRejected(): void
     {
         foreach ($this->generateViolations() as $description => $configuration) {
             self::assertFalse(

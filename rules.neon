@@ -1,0 +1,10 @@
+services:
+	- KonradMichalik\Ttt\PHPStan\TestContext
+	-
+		class: KonradMichalik\Ttt\PHPStan\ManualGlobalsRule
+		tags:
+			- phpstan.rules.rule
+	-
+		class: KonradMichalik\Ttt\PHPStan\ManualEnvVarRule
+		tags:
+			- phpstan.rules.rule

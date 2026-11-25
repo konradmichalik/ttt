@@ -122,6 +122,10 @@ public function showsMaintenanceButton(WithBackendUser $user, bool $expected): v
 | [Contract kit](docs/kits/contract.md) | Generates violation-case tests from a `validateConfiguration()`-style contract |
 | [Fixture kit](docs/kits/fixture.md) | Disposable test fixtures (images, log files) |
 
+### PHPStan rules
+
+With PHPStan 2.1 or newer, ttt reports `putenv()` and hand-set `$GLOBALS['TYPO3_CONF_VARS']` / `$GLOBALS['TCA']` in unit tests and names the attribute to use instead. See [`docs/phpstan-rules.md`](docs/phpstan-rules.md).
+
 See [`docs/lifecycle.md`](docs/lifecycle.md) for how attribute application and restoration are wired into PHPUnit's event lifecycle, [`docs/why-extension.md`](docs/why-extension.md) for why that's an extension instead of `tearDown()`, and [`docs/without-extension.md`](docs/without-extension.md) for the imperative alternative.
 
 ## 🧩 Extending

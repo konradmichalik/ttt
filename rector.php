@@ -35,6 +35,7 @@ return RectorConfig::configure()
         // was removed in PHPUnit 13. ::class there would break PHPStan's class.notFound check.
         StringClassNameToClassConstantRector::class => [
             __DIR__.'/src/Handler/FunctionalTestCaseGuard.php',
+            __DIR__.'/src/PHPStan/TestContext.php',
             __DIR__.'/src/Subscriber/ApplySandboxSubscriber.php',
             __DIR__.'/tests/src/Subscriber/ApplySandboxSubscriberTest.php',
         ],

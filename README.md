@@ -123,7 +123,7 @@ public function showsMaintenanceButton(WithBackendUser $user, bool $expected): v
 | [Factory kit](docs/kits/factory.md) | TCA-aware record factories for functional tests, plus `#[WithRecords]` |
 | [Fixture kit](docs/kits/fixture.md) | Disposable test fixtures (images, log files, JSON responses) |
 
-The separate [ttt-phpstan](https://github.com/konradmichalik/ttt-phpstan) package ships PHPStan rules that point hand-written test state to the matching attribute, see [`docs/phpstan-rule.md`](docs/phpstan-rule.md).
+The optional [PHPStan rule](docs/phpstan-rule.md) points direct global state changes in tests to the matching attribute.
 
 See [`docs/lifecycle.md`](docs/lifecycle.md) for how attribute application and restoration are wired into PHPUnit's event lifecycle, [`docs/why-extension.md`](docs/why-extension.md) for why that's an extension instead of `tearDown()`, and [`docs/without-extension.md`](docs/without-extension.md) for the imperative alternative.
 

@@ -30,6 +30,7 @@
 		"fakerphp/faker": "^1.24",
 		"konradmichalik/php-cs-fixer-preset": "^0.3.0",
 		"konradmichalik/php-doc-block-header-fixer": "^0.4.0",
+		"nikic/php-parser": "^5.0",
 		"phpstan/phpstan": "^2.0",
 		"phpstan/phpstan-phpunit": "^2.0",
 		"rector/rector": "^2.2",
@@ -42,6 +43,7 @@
 	"suggest": {
 		"ext-gd": "Required for ImageFixtures",
 		"fakerphp/faker": "Required for the record factories (RecordFactory, #[WithRecords]) (^1.24)",
+		"phpstan/extension-installer": "Activates the PHPStan rule that points direct global state changes in tests to ttt attributes (^1.4)",
 		"typo3/cms-core": "Required for TYPO3-specific attributes like InApplicationContext and WithEnvironment (^13.4 || ^14.0)",
 		"typo3/cms-frontend": "Required for WithFrontendUser (^13.4 || ^14.0)"
 	},
@@ -68,6 +70,13 @@
 			"php": "8.2.0"
 		},
 		"sort-packages": true
+	},
+	"extra": {
+		"phpstan": {
+			"includes": [
+				"extension.neon"
+			]
+		}
 	},
 	"scripts": {
 		"fix": [

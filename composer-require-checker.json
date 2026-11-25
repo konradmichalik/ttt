@@ -6,6 +6,19 @@
 		"imagepng",
 		"Faker\\Factory",
 		"Faker\\Generator",
+		"PHPStan\\Analyser\\Scope",
+		"PHPStan\\Rules\\IdentifierRuleError",
+		"PHPStan\\Rules\\Rule",
+		"PHPStan\\Rules\\RuleErrorBuilder",
+		"PhpParser\\Node",
+		"PhpParser\\Node\\Expr\\ArrayDimFetch",
+		"PhpParser\\Node\\Expr\\Assign",
+		"PhpParser\\Node\\Expr\\FuncCall",
+		"PhpParser\\Node\\Expr\\StaticCall",
+		"PhpParser\\Node\\Expr\\Variable",
+		"PhpParser\\Node\\Identifier",
+		"PhpParser\\Node\\Name",
+		"PhpParser\\Node\\Scalar\\String_",
 		"Psr\\Http\\Message\\ResponseInterface",
 		"TYPO3\\CMS\\Core\\Authentication\\BackendUserAuthentication",
 		"TYPO3\\CMS\\Core\\Cache\\Backend\\TransientMemoryBackend",
@@ -27,6 +40,7 @@
 		"TYPO3\\CMS\\Core\\Site\\Entity\\Site",
 		"TYPO3\\CMS\\Core\\Site\\Entity\\SiteSettings",
 		"TYPO3\\CMS\\Core\\Utility\\GeneralUtility",
-		"TYPO3\\CMS\\Frontend\\Authentication\\FrontendUserAuthentication"
+		"TYPO3\\CMS\\Frontend\\Authentication\\FrontendUserAuthentication",
+		"TYPO3\\TestingFramework\\Core\\Functional\\FunctionalTestCase"
 	]
 }

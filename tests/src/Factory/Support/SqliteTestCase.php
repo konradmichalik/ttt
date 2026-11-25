@@ -39,7 +39,7 @@ abstract class SqliteTestCase extends TestCase
     /** @var array<class-string, SingletonInterface> */
     private static array $previousSingletons = [];
 
-    public static function setUpBeforeClass(): void
+    final public static function setUpBeforeClass(): void
     {
         self::$previousSingletons = GeneralUtility::getSingletonInstances();
         self::$previousGlobals = [
@@ -52,7 +52,7 @@ abstract class SqliteTestCase extends TestCase
      * Not in tearDown(): Terrarium restores attributes on Test\Finished, after
      * tearDown(), and #[WithRecords] still needs the database then.
      */
-    public static function tearDownAfterClass(): void
+    final public static function tearDownAfterClass(): void
     {
         GeneralUtility::makeInstance(ConnectionPool::class)->resetConnections();
         GeneralUtility::resetSingletonInstances(self::$previousSingletons);

@@ -73,12 +73,12 @@ abstract class RecordFactory
     /** @var list<array{int, array<string, mixed>}> */
     private array $translations = [];
 
-    public static function new(): static
+    final public static function new(): static
     {
         return new static();
     }
 
-    public function count(int $count): static
+    final public function count(int $count): static
     {
         $clone = clone $this;
         $clone->count = $count;
@@ -89,7 +89,7 @@ abstract class RecordFactory
     /**
      * @param array<string, mixed> $attributes
      */
-    public function state(array $attributes): static
+    final public function state(array $attributes): static
     {
         $clone = clone $this;
         $clone->states[] = $attributes;
@@ -101,7 +101,7 @@ abstract class RecordFactory
      * Creates the parent first and stores its uid in the given field (for example "pid").
      * All records of one create() run share that parent.
      */
-    public function for(self $parent, string $field): static
+    final public function for(self $parent, string $field): static
     {
         $clone = clone $this;
         $clone->parents[] = [$parent, $field];
@@ -112,7 +112,7 @@ abstract class RecordFactory
     /**
      * Creates the children after the record and wires them up according to the TCA of the field.
      */
-    public function has(self $child, string $field): static
+    final public function has(self $child, string $field): static
     {
         $clone = clone $this;
         $clone->children[] = [$child, $field];
@@ -125,7 +125,7 @@ abstract class RecordFactory
      *
      * @param array<string, mixed> $overrides
      */
-    public function translated(int $languageUid, array $overrides = []): static
+    final public function translated(int $languageUid, array $overrides = []): static
     {
         $clone = clone $this;
         $clone->translations[] = [$languageUid, $overrides];
@@ -138,7 +138,7 @@ abstract class RecordFactory
      *
      * @return list<array<string, mixed>>
      */
-    public function make(): array
+    final public function make(): array
     {
         $faker = $this->faker();
         $rows = [];
@@ -156,7 +156,7 @@ abstract class RecordFactory
         return $rows;
     }
 
-    public function create(): RecordCollection
+    final public function create(): RecordCollection
     {
         $log = new CreationLog();
 

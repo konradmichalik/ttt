@@ -29,7 +29,7 @@
 		"ergebnis/composer-normalize": "^2.44",
 		"fakerphp/faker": "^1.24",
 		"konradmichalik/php-cs-fixer-preset": "^0.4.0",
-		"konradmichalik/php-doc-block-header-fixer": "^0.4.0",
+		"konradmichalik/php-doc-block-header-fixer": "^0.5.0",
 		"nikic/php-parser": "^5.0",
 		"phpstan/phpstan": "^2.0",
 		"phpstan/phpstan-phpunit": "^2.0",
